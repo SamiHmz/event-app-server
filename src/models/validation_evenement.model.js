@@ -1,3 +1,5 @@
+var { etat } = require("./config/magic_strings");
+const etatEvenement = Object.values(etat);
 module.exports = (sequelize, DataTypes) => {
   var EventValidation = sequelize.define(
     "validation_evenement",
@@ -14,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: [["en attente", "approuvé", "rejetè"]],
+          isIn: [etatEvenement],
         },
       },
     },

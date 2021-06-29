@@ -2,7 +2,8 @@ const joi = require("joi");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
-const { roles } = require("./controllers.util");
+const { roles } = require("../models/config/magic_strings");
+const userRoles = Object.values(roles);
 require("dotenv").config();
 
 const db = require("../models").dbModels;
@@ -21,7 +22,7 @@ var generalSchema = {
   numero: joi.number().required(),
   photo: joi.string().allow(null, ""),
   type_id: joi.number().required(),
-  type: joi.string().required().valid("utilisateur", "initiateur"),
+  type: joi.string().required().valid("administrateur", "initiateur"),
   id: joi.number().required(),
 };
 
@@ -29,17 +30,20 @@ schema.typeAndId = joi.object(_.pick(generalSchema, ["type", "id"]));
 
 schema.type = joi.object(_.pick(generalSchema, ["type"]));
 
-schema.utilisateurCreate = joi.object(
+schema.administrateurCreate = joi.object(
   _.assignIn(_.omit(generalSchema, ["type", "id", "type_id"]), {
     role: joi
       .string()
       .required()
-      .valid(roles.SUPER_ADMIN, roles.ADMIN, roles.SIMPLE),
+      .valid(...userRoles),
   })
 );
 schema.initiateurCreate = joi.object(
   _.assignIn(_.omit(generalSchema, ["type", "id", "prenom"]), {
-    role: joi.string().required().valid(roles.ADMIN, roles.SIMPLE),
+    role: joi
+      .string()
+      .required()
+      .valid(...userRoles),
   })
 );
 
@@ -99,7 +103,10 @@ UtilisateurController.authenticateUser = async (req, res) => {
   if (!validatePassword)
     return res.status(400).send("Invalid email or password");
 
-  const token = jwt.sign({ id: user.id, role: user.role }, process.env.jwtKey);
+  const token = jwt.sign(
+    { id: user.id, role: user.role, nom: user.nom },
+    process.env.jwtKey
+  );
 
   res.status(200).send(token);
 };

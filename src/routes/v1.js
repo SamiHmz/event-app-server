@@ -22,6 +22,8 @@ router.get("/evenement/:id", EvenementController.getOneEvenement);
 router.get("/evenement/", EvenementController.getAllEvenement);
 router.put("/evenement/:id", EvenementController.updateEvenement);
 router.delete("/evenement/:id", EvenementController.deleteEvenement);
+router.get("/demande/:pageNumber", EvenementController.getAllDemandes);
+router.get("/demandes/count", EvenementController.getDemandesCount);
 
 /************************* Evenement Validation *****************/
 

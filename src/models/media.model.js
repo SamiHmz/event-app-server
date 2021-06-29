@@ -1,3 +1,5 @@
+const { langue, media } = require("./config/magic_strings");
+
 module.exports = (sequelize, DataTypes) => {
   var Media = sequelize.define(
     "media",
@@ -40,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["tv", "radio", "journal", "journal", "jouranl en ligne"],
+          isIn: [media],
         },
       },
       langue: {
@@ -48,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["tv", "radio", "journal", "journal", "jouranl en ligne"],
+          isIn: [langue],
         },
       },
     },

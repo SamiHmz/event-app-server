@@ -1,3 +1,5 @@
+const { etat } = require("./config/magic_strings");
+const etatSponsoring = Object.values(etat);
 module.exports = (sequelize, DataTypes) => {
   var SponsoringValidation = sequelize.define(
     "sponsoring_validation",
@@ -14,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["en attente", "approuvé", "rejetè"],
+          isIn: [etatSponsoring],
         },
       },
     },

@@ -1,5 +1,6 @@
 const joi = require("joi");
-const { etat, validateId } = require("./controllers.util");
+const { validateId } = require("./controllers.util");
+const { etat } = require("../models/config/magic_strings");
 const db = require("../models").dbModels;
 const _ = require("lodash");
 const schema = joi.object({

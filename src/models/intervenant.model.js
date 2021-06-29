@@ -1,3 +1,5 @@
+const { sexe, etat } = require("./config/magic_strings");
+const etatIntervenant = Object.values(etat);
 module.exports = (sequelize, DataTypes) => {
   var Intervenant = sequelize.define(
     "intervenant",
@@ -30,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["homme", "femme"],
+          isIn: [sexe],
         },
       },
       telephone: {
@@ -55,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["en attente", "approuvé", "rejetè"],
+          isIn: [etatIntervenant],
         },
       },
     },

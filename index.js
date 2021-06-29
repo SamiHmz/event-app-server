@@ -6,6 +6,7 @@ const router = require("./src/routes/v1");
 const error = require("./src/middlewares/error");
 const logging = require("./src/util/logging");
 const cors = require("cors");
+
 // envirment variable
 require("dotenv").config();
 
@@ -28,7 +29,7 @@ app.use("/api/v1/", router);
 app.use(error);
 
 // Server and Db
-sequelize.sync().then(
+sequelize.sync({ sync: true }).then(
   app.listen(PORT, () => {
     console.log(`app listening at port ${PORT}...`);
   })

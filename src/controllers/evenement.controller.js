@@ -1,17 +1,34 @@
 const joi = require("joi");
 const db = require("../models").dbModels;
-const { validateId, etat, roles } = require("./controllers.util");
+const { Op } = require("sequelize");
+const {
+  typeEvenement,
+  modeEvenement,
+  etat,
+  roles,
+} = require("../models/config/magic_strings");
+
+const { validateId } = require("./controllers.util");
 
 const EvenementController = {};
 
 var schema = {};
-
+var limit = 10;
 var generalSchema = {
-  titre: joi.string().required(),
+  intitulé: joi.string().required(),
+  debut: joi.date().required(),
+  fin: joi.date().required(),
   lieu: joi.string().required(),
   programe: joi.string().required(),
   objectifs: joi.string().required(),
-  type_event_id: joi.number().required(),
+  type: joi
+    .string()
+    .required()
+    .valid(...typeEvenement),
+  mode: joi
+    .string()
+    .required()
+    .valid(...modeEvenement),
 };
 
 schema.create = joi.object(generalSchema);
@@ -53,7 +70,7 @@ EvenementController.getOneEvenement = async (req, res) => {
 EvenementController.getAllEvenement = async (req, res) => {
   var evenements = null;
 
-  if (req.user.type !== "initiateur") {
+  if (req.user.type === "initiateur") {
     evenements = await db.evenement.findAll({
       limit: 3,
       offset: 3,
@@ -111,6 +128,63 @@ EvenementController.deleteEvenement = async (req, res) => {
   if (!evenement) return res.status(400).send("Evenement doesn't exist");
   await evenement.destroy();
   res.status(200).send(evenement);
+};
+
+EvenementController.getAllDemandes = async (req, res) => {
+  // calculate the request page number offset
+  var offset = (req.params.pageNumber - 1) * limit;
+  var demandes = null;
+
+  if (req.user.type === "initiateur") {
+    demandes = await db.evenement.findAll({
+      limit,
+      offset,
+      where: {
+        initiateur_id: req.user.id,
+        etat: {
+          [Op.ne]: etat.APROUVER,
+        },
+      },
+      include: db.type_evenement,
+    });
+  } else {
+    demandes = await db.evenement.findAll({
+      limit: limit,
+      offset: offset,
+      where: {
+        etat: {
+          [Op.ne]: etat.APROUVER,
+        },
+      },
+      include: db.type_evenement,
+    });
+  }
+  res.status(200).send(demandes);
+};
+
+EvenementController.getDemandesCount = async (req, res) => {
+  var count = 0;
+
+  if (req.user.type === "initiateur") {
+    count = await db.evenement.count({
+      where: {
+        initiateur_id: req.user.id,
+        etat: {
+          [Op.ne]: etat.APROUVER,
+        },
+      },
+    });
+  } else {
+    count = await db.evenement.count({
+      where: {
+        etat: {
+          [Op.ne]: etat.APROUVER,
+        },
+      },
+      include: db.type_evenement,
+    });
+  }
+  res.status(200).send({ count });
 };
 
 module.exports = EvenementController;

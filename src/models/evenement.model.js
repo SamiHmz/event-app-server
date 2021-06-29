@@ -1,9 +1,11 @@
-var state = require("./config/constant");
+var { modeEvenement, typeEvenement, etat } = require("./config/magic_strings");
+const etatEvenement = Object.values(etat);
+
 module.exports = (sequelize, DataTypes) => {
   var Evenement = sequelize.define(
     "evenement",
     {
-      titre: {
+      intitulé: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
@@ -36,7 +38,37 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: [["en attente", "approuvé", "rejetè"]],
+          isIn: [etatEvenement],
+        },
+      },
+      debut: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      fin: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          isIn: [typeEvenement],
+        },
+      },
+      mode: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          isIn: [modeEvenement],
         },
       },
     },
@@ -52,9 +84,6 @@ module.exports = (sequelize, DataTypes) => {
     });
     Evenement.hasMany(dbModels.sponsoring, { foreignKey: "evenement_id" });
     Evenement.hasMany(dbModels.intervenant, { foreignKey: "evenement_id" });
-    Evenement.belongsTo(dbModels.type_evenement, {
-      foreignKey: "type_event_id",
-    });
     Evenement.belongsToMany(dbModels.journaliste, {
       through: dbModels.evenement_journaliste,
       foreignKey: "evenement_id",

@@ -1,5 +1,4 @@
-const { stringInterval } = require("./config/util");
-const sponsoringTypes = ["espèce", "matériel"];
+const { modeSponsoring } = require("./config/magic_strings");
 
 module.exports = (sequelize, DataTypes) => {
   var Sponsoring = sequelize.define(
@@ -33,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: ["espèce", "matériel"],
+          isIn: modeSponsoring,
         },
       },
     },

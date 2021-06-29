@@ -2,16 +2,6 @@ const joi = require("joi");
 const db = require("../models").dbModels;
 
 const util = {};
-util.etat = {
-  ATENTE: "en attente",
-  APROUVER: "approuvé",
-  REJETER: "rejetè",
-};
-util.roles = {
-  SUPER_ADMIN: "super admin",
-  ADMIN: "admin",
-  SIMPLE: "simple",
-};
 
 util.validateId = (req, res, id) => {
   var schema = joi.object({ id: joi.number().required() });

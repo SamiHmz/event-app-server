@@ -1,3 +1,6 @@
+var { typeInitiateur, roles } = require("./config/magic_strings");
+const initiateurRoles = Object.values(roles);
+
 module.exports = (sequelize, DataTypes) => {
   var Initiateur = sequelize.define(
     "initiateur",
@@ -45,7 +48,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: [["admin", "simple"]],
+          isIn: [initiateurRoles],
+        },
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          isIn: [typeInitiateur],
         },
       },
     },
@@ -53,9 +64,6 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Initiateur.associate = (dbModels) => {
-    Initiateur.belongsTo(dbModels.type_initiateur, {
-      foreignKey: "type_id",
-    });
     Initiateur.hasMany(dbModels.evenement, {
       foreignKey: "initiateur_id",
     });

@@ -1,6 +1,8 @@
+const { roles } = require("./config/magic_strings");
+const adminRoles = Object.values(roles);
 module.exports = (sequelize, DataTypes) => {
-  var Utilisateur = sequelize.define(
-    "utilisateur",
+  var Administrateur = sequelize.define(
+    "administrateur",
     {
       nom: {
         type: DataTypes.STRING,
@@ -51,12 +53,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notEmpty: true,
-          isIn: [["super admin", "admin", "simple"]],
+          isIn: [adminRoles],
         },
       },
     },
     { timestamps: false, freezeTableName: true }
   );
 
-  return Utilisateur;
+  return Administrateur;
 };
