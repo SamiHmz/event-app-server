@@ -18,8 +18,12 @@ const typeEvenement = [
   "Visit",
   "Compètision",
 ];
-const typeInitiateur = ["club", "association"];
 
+const typeUtilisateur = {
+  ADMINISTRATEUR: "administrateur",
+  INITIATEUR: "initiateur",
+};
+const typeInitiateur = ["club", "association"];
 const modeEvenement = ["Prèsentiel", "En Ligne"];
 
 const modeSponsoring = ["espèce", "matériel"];
@@ -34,6 +38,7 @@ module.exports = {
   modeEvenement,
   typeInitiateur,
   modeSponsoring,
+  typeUtilisateur,
   media,
   langue,
   sexe,

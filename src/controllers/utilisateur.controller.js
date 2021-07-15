@@ -2,7 +2,11 @@ const joi = require("joi");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
-const { roles } = require("../models/config/magic_strings");
+const {
+  roles,
+  typeInitiateur,
+  typeUtilisateur,
+} = require("../models/config/magic_strings");
 const userRoles = Object.values(roles);
 require("dotenv").config();
 
@@ -14,52 +18,71 @@ const UtilisateurController = {};
 /*****************************Users Util Functions ****************************************/
 
 /************************* Data Validation r*****************************/
-var generalSchema = {
+
+var initiateurSchema = joi.object({
   nom: joi.string().required(),
-  prenom: joi.string().required(),
-  email: joi.string().email(),
+  email: joi.string().email().required(),
   password: joi.string().required(),
   numero: joi.number().required(),
   photo: joi.string().allow(null, ""),
-  type_id: joi.number().required(),
-  type: joi.string().required().valid("administrateur", "initiateur"),
+  type: joi
+    .number()
+    .required()
+    .valid(...typeInitiateur),
+  role: joi
+    .number()
+    .required()
+    .valid(...userRoles),
+});
+
+var administrateurSchema = joi.object({
+  nom: joi.string().required(),
+  prenom: joi.string().required(),
+  email: joi.string().email().required(),
+  password: joi.string().required(),
+  numero: joi.number().required(),
+  photo: joi.string().allow(null, ""),
+  role: joi
+    .number()
+    .required()
+    .valid(...userRoles),
+});
+
+const typeAndIdSchema = joi.object({
+  type: joi
+    .string()
+    .required()
+    .valid(typeUtilisateur.ADMINISTRATEUR, typeUtilisateur.INITIATEUR),
   id: joi.number().required(),
-};
+});
 
-schema.typeAndId = joi.object(_.pick(generalSchema, ["type", "id"]));
+const typeSchema = joi.object({
+  type: joi
+    .string()
+    .required()
+    .valid(typeUtilisateur.ADMINISTRATEUR, typeUtilisateur.INITIATEUR),
+});
 
-schema.type = joi.object(_.pick(generalSchema, ["type"]));
-
-schema.administrateurCreate = joi.object(
-  _.assignIn(_.omit(generalSchema, ["type", "id", "type_id"]), {
-    role: joi
-      .string()
-      .required()
-      .valid(...userRoles),
-  })
-);
-schema.initiateurCreate = joi.object(
-  _.assignIn(_.omit(generalSchema, ["type", "id", "prenom"]), {
-    role: joi
-      .string()
-      .required()
-      .valid(...userRoles),
-  })
-);
-
-schema.login = joi.object(_.pick(generalSchema, ["email", "password"]));
+const loginSchema = joi.object({
+  email: joi.string().email().required(),
+  password: joi.string().required(),
+});
 
 UtilisateurController.createNewUser = async (req, res) => {
   const { body } = req;
   const userType = req.params.type;
   var result = null;
   // validate user type url param
-  result = schema.type.validate({ type: userType });
+  result = typeSchema.validate({ type: userType });
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
   //validate the body of the request
-  result = schema[userType + "Create"].validate(body);
+  if (userType === typeUtilisateur.INITIATEUR) {
+    result = initiateurSchema.validate(body);
+  } else {
+    result = administrateurSchema.validate(body);
+  }
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
@@ -81,11 +104,11 @@ UtilisateurController.authenticateUser = async (req, res) => {
   const userType = req.params.type;
   var result = null;
 
-  result = schema.type.validate({ type: userType });
+  result = typeSchema.validate({ type: userType });
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
-  result = schema.login.validate(body);
+  result = loginSchema.validate(body);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
@@ -104,7 +127,7 @@ UtilisateurController.authenticateUser = async (req, res) => {
     return res.status(400).send("Invalid email or password");
 
   const token = jwt.sign(
-    { id: user.id, role: user.role, nom: user.nom },
+    { id: user.id, role: user.role, nom: user.nom, type: userType },
     process.env.jwtKey
   );
 
@@ -113,7 +136,7 @@ UtilisateurController.authenticateUser = async (req, res) => {
 
 UtilisateurController.getOneUser = async (req, res) => {
   // validate url params
-  const result = schema.typeAndId.validate(req.params);
+  const result = typeAndIdSchema.validate(req.params);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
   // check user existence
@@ -128,7 +151,7 @@ UtilisateurController.getAllUsers = async (req, res) => {
   const userType = req.params.type;
 
   // validate user type url param
-  result = schema.type.validate({ type: userType });
+  result = typeSchema.validate({ type: userType });
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
@@ -143,7 +166,7 @@ UtilisateurController.getAllUsers = async (req, res) => {
 
 UtilisateurController.updateUser = async (req, res) => {
   // validate url params
-  const result = schema.typeAndId.validate(req.params);
+  const result = typeAndIdSchema.validate(req.params);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
   // check user existence

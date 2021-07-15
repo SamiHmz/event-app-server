@@ -6,6 +6,7 @@ const {
   modeEvenement,
   etat,
   roles,
+  typeUtilisateur,
 } = require("../models/config/magic_strings");
 
 const { validateId } = require("./controllers.util");
@@ -40,6 +41,7 @@ EvenementController.createEvenement = async (req, res) => {
     return res.status(400).send(result.error.details[0].message);
   body.initiateur_id = req.user.id;
   body.etat = etat.ATENTE;
+  body.is_opened = false;
   const evenement = await db.evenement.create(body);
   res.status(201).send(evenement);
 };
@@ -49,7 +51,7 @@ EvenementController.getOneEvenement = async (req, res) => {
   if (!validateId(req, res, id)) return;
 
   var evenement = null;
-  if (req.user.role === roles.SUPER_ADMIN || req.user.role === roles.ADMIN) {
+  if (req.user.type === typeUtilisateur.ADMINISTRATEUR) {
     evenement = await db.evenement.findOne({
       where: {
         id,
@@ -88,10 +90,7 @@ EvenementController.getAllEvenement = async (req, res) => {
 EvenementController.updateEvenement = async (req, res) => {
   const { body } = req;
   const id = req.params.id;
-
-  var result = validateId(id);
-  if (result.error)
-    return res.status(400).send(result.error.details[0].message);
+  if (!validateId(req, res, id)) return;
 
   result = schema.create.validate(body);
   if (result.error)
@@ -109,9 +108,9 @@ EvenementController.updateEvenement = async (req, res) => {
   Object.keys(body).forEach((prop) => {
     evenement[prop] = body[prop];
   });
-
+  evenement.etat = etat.ATENTE;
   await evenement.save();
-  res.send(evenement);
+  res.status(200).send(evenement);
 };
 
 EvenementController.deleteEvenement = async (req, res) => {
@@ -141,22 +140,16 @@ EvenementController.getAllDemandes = async (req, res) => {
       offset,
       where: {
         initiateur_id: req.user.id,
-        etat: {
-          [Op.ne]: etat.APROUVER,
-        },
       },
-      include: db.type_evenement,
     });
   } else {
     demandes = await db.evenement.findAll({
       limit: limit,
       offset: offset,
-      where: {
-        etat: {
-          [Op.ne]: etat.APROUVER,
-        },
+      where: {},
+      include: {
+        model: db.initiateur,
       },
-      include: db.type_evenement,
     });
   }
   res.status(200).send(demandes);
@@ -185,6 +178,40 @@ EvenementController.getDemandesCount = async (req, res) => {
     });
   }
   res.status(200).send({ count });
+};
+
+EvenementController.changeDemandeIsOpened = async (req, res) => {
+  const id = req.params.id;
+  const isOpeninSchema = joi.object({
+    is_opened: joi.boolean().required(),
+  });
+  if (!validateId(req, res, id)) return;
+  const result = isOpeninSchema.validate(req.body);
+  if (result.error)
+    return res.status(400).send(result.error.details[0].message);
+
+  var evenement = await db.evenement.findOne({
+    where: {
+      id,
+    },
+  });
+  if (!evenement) return res.status(400).send("Evenement doesn't exist");
+  evenement.is_opened = req.body.is_opened;
+  await evenement.save();
+  res.status(200).send(evenement);
+};
+
+EvenementController.getIsOpened = async (req, res) => {
+  const id = req.params.id;
+  if (!validateId(req, res, id)) return;
+
+  var evenement = await db.evenement.findOne({
+    where: {
+      id,
+    },
+  });
+  if (!evenement) return res.status(400).send("Evenement doesn't exist");
+  res.status(200).send(evenement.is_opened);
 };
 
 module.exports = EvenementController;

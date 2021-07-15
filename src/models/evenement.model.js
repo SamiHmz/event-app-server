@@ -71,6 +71,13 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [modeEvenement],
         },
       },
+      is_opened: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
     },
     {
       freezeTableName: true,
@@ -81,6 +88,9 @@ module.exports = (sequelize, DataTypes) => {
     Evenement.hasOne(dbModels.bilan, { foreignKey: "evenement_id" });
     Evenement.hasMany(dbModels.validation_evenement, {
       foreignKey: "evenement_id",
+    });
+    Evenement.belongsTo(dbModels.initiateur, {
+      foreignKey: "initiateur_id",
     });
     Evenement.hasMany(dbModels.sponsoring, { foreignKey: "evenement_id" });
     Evenement.hasMany(dbModels.intervenant, { foreignKey: "evenement_id" });
