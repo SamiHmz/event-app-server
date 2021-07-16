@@ -60,5 +60,10 @@ module.exports = (sequelize, DataTypes) => {
     { timestamps: false, freezeTableName: true }
   );
 
+  Administrateur.associate = (dbModels) => {
+    Administrateur.hasMany(dbModels.notification_administrateur, {
+      foreignKey: "administrateur_id",
+    });
+  };
   return Administrateur;
 };

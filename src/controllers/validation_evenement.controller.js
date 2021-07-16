@@ -1,6 +1,6 @@
 const joi = require("joi");
 const { validateId } = require("./controllers.util");
-const { etat } = require("../models/config/magic_strings");
+const { etat, typeUtilisateur } = require("../models/config/magic_strings");
 const db = require("../models").dbModels;
 const _ = require("lodash");
 const schema = joi.object({
@@ -42,12 +42,14 @@ ValidationEvenementController.createValidation = async (req, res) => {
     nom: req.user.nom,
   });
 
+  // initiateur room
+  const room = `${typeUtilisateur.INITIATEUR}-${evenement.initiateur_id}`;
+
   // check if the room emty
-  const isRoomEmpty =
-    req.io.sockets.adapter.rooms.get("initiateur-1").size == 0;
+  const isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
 
   if (!isRoomEmpty) {
-    req.io.to("initiateur-1").emit("notifications", notification);
+    req.io.to(room).emit("notifications", notification);
   }
   res.status(201).send(validation);
 };

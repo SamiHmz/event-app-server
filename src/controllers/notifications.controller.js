@@ -18,13 +18,22 @@ NotificationController.createNotification = async (req, res) => {
 
 NotificationController.getAllNotifications = async (req, res) => {
   var offset = (req.params.pageNumber - 1) * limit;
-
-  if ((req.user.type = typeUtilisateur.INITIATEUR)) {
-    var notifictions = await db.notification_initiateur.findAll({
+  var notifictions = null;
+  if (req.user.type == typeUtilisateur.INITIATEUR) {
+    notifictions = await db.notification_initiateur.findAll({
       limit: limit,
       offset: offset,
       where: {
         initiateur_id: req.user.id,
+      },
+      order: [["createdAt", "DESC"]],
+    });
+  } else {
+    notifictions = await db.notification_administrateur.findAll({
+      limit: limit,
+      offset: offset,
+      where: {
+        administrateur_id: req.user.id,
       },
       order: [["createdAt", "DESC"]],
     });
@@ -41,13 +50,20 @@ NotificationController.getUnviewedNotificationsCount = async (req, res) => {
         is_viewed: false,
       },
     });
+  } else {
+    count = await db.notification_administrateur.count({
+      where: {
+        administrateur_id: req.user.id,
+        is_viewed: false,
+      },
+    });
   }
   res.status(200).send({ count });
 };
 
 NotificationController.setAllToViewed = async (req, res) => {
   var result = null;
-  if (req.user.type === typeUtilisateur.INITIATEUR) {
+  if (req.user.type == typeUtilisateur.INITIATEUR) {
     result = await db.notification_initiateur.update(
       {
         is_viewed: true,
@@ -58,8 +74,37 @@ NotificationController.setAllToViewed = async (req, res) => {
         },
       }
     );
-    res.status(200).send(result);
+  } else {
+    result = await db.notification_administrateur.update(
+      {
+        is_viewed: true,
+      },
+      {
+        where: {
+          administrateur_id: req.user.id,
+        },
+      }
+    );
   }
+  res.status(200).send(result);
+};
+
+NotificationController.setNotificationToclicked = async (req, res) => {
+  const { id } = req.params;
+
+  if (!validateId(req, res, id)) return;
+
+  var notification = null;
+
+  if (req.user.type == typeUtilisateur.INITIATEUR) {
+    notification = await db.notification_initiateur.findByPk(id);
+  } else {
+    notification = await db.notification_administrateur.findByPk(id);
+  }
+
+  notification.is_clicked = true;
+  await notification.save();
+  res.status(200).send(notification);
 };
 
 module.exports = NotificationController;

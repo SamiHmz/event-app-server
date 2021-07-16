@@ -58,4 +58,8 @@ router.get(
   NotificationController.getUnviewedNotificationsCount
 );
 router.put("/notification/viewed", NotificationController.setAllToViewed);
+router.put(
+  "/notification/clicked/:id",
+  NotificationController.setNotificationToclicked
+);
 module.exports = router;
