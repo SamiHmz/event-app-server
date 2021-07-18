@@ -62,7 +62,9 @@ EvenementController.createEvenement = async (req, res) => {
   const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
 
   // check if the room emty
-  const isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
+  if (req.io.sockets.adapter.rooms.get(room)) {
+    var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
+  }
   if (!isRoomEmpty) {
     req.io.to(room).emit("notifications", notification);
   }

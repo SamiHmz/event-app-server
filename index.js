@@ -55,7 +55,7 @@ app.use(function (req, res, next) {
 app.use("/api/v1/", router);
 
 // Server and Db
-sequelize.sync().then(
+sequelize.sync({ force: true }).then(
   server.listen(PORT, () => {
     console.log(`app listening at port ${PORT}...`);
   })

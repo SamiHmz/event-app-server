@@ -1,63 +1,52 @@
-const { sexe, etat } = require("./config/magic_strings");
+var { etat } = require("./config/magic_strings");
 const etatIntervenant = Object.values(etat);
 module.exports = (sequelize, DataTypes) => {
-  var Intervenant = sequelize.define(
-    "intervenant",
+  var IntervenantValidation = sequelize.define(
+    "validation_intervenant",
     {
-      nom: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
-      prenom: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          notEmpty: true,
-          isEmail: true,
-        },
-      },
-      sexe: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-          isIn: [sexe],
-        },
-      },
-      telephone: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        validate: {
-          isNumeric: true,
-          notEmpty: true,
-        },
-      },
-      photo: DataTypes.STRING,
-      cv: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
-      etat: {
+      decision_admin_simple: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
           notEmpty: true,
           isIn: [etatIntervenant],
+        },
+      },
+      details_decision_admin_simple: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      decision_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          isIn: [etatIntervenant],
+        },
+      },
+      details_decision_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      decision_super_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+          isIn: [etatIntervenant],
+        },
+      },
+      details_super_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
         },
       },
     },
@@ -66,11 +55,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  Intervenant.associate = (dbModels) => {
-    Intervenant.hasOne(dbModels.validation_intervenant, {
+  IntervenantValidation.associate = (dbModels) => {
+    IntervenantValidation.belongsTo(dbModels.intervenant, {
       foreignKey: "intervenant_id",
     });
   };
 
-  return Intervenant;
+  return IntervenantValidation;
 };
