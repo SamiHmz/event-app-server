@@ -1,10 +1,11 @@
-etat = {
+const etat = {
   ATENTE: "en attente",
   APROUVER: "approuvé",
   REJETER: "rejetè",
 };
 
-roles = {
+const roles = {
+  SUPER_ADMIN: "super_admin",
   ADMIN: "admin",
   SIMPLE: "simple",
 };
@@ -25,6 +26,7 @@ const typeUtilisateur = {
 };
 const typeInitiateur = ["club", "association"];
 const modeEvenement = ["Prèsentiel", "En Ligne"];
+const typeIntervenant = ["interne", "externe"];
 
 const modeSponsoring = ["espèce", "matériel"];
 const media = ["tv", "radio", "journal", "journal", "jouranl en ligne"];
@@ -42,4 +44,5 @@ module.exports = {
   media,
   langue,
   sexe,
+  typeIntervenant,
 };

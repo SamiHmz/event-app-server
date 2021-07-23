@@ -1,5 +1,7 @@
-const { sexe, etat } = require("./config/magic_strings");
+const { sexe, etat, typeIntervenant } = require("./config/magic_strings");
 const etatIntervenant = Object.values(etat);
+const typeIntervenantValues = Object.values(typeIntervenant);
+
 module.exports = (sequelize, DataTypes) => {
   var Intervenant = sequelize.define(
     "intervenant",
@@ -21,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
           notEmpty: true,
           isEmail: true,
@@ -38,7 +39,6 @@ module.exports = (sequelize, DataTypes) => {
       telephone: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
         validate: {
           isNumeric: true,
           notEmpty: true,
@@ -55,9 +55,19 @@ module.exports = (sequelize, DataTypes) => {
       etat: {
         type: DataTypes.STRING,
         allowNull: false,
+        defaultValue: etat.ATENTE,
         validate: {
           notEmpty: true,
           isIn: [etatIntervenant],
+        },
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: etat.ATENTE,
+        validate: {
+          notEmpty: true,
+          isIn: [typeIntervenantValues],
         },
       },
     },
@@ -69,6 +79,9 @@ module.exports = (sequelize, DataTypes) => {
   Intervenant.associate = (dbModels) => {
     Intervenant.hasOne(dbModels.validation_intervenant, {
       foreignKey: "intervenant_id",
+    });
+    Intervenant.belongsTo(dbModels.evenement, {
+      foreignKey: "evenement_id",
     });
   };
 

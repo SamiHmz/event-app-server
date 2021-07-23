@@ -26,11 +26,11 @@ var initiateurSchema = joi.object({
   numero: joi.number().required(),
   photo: joi.string().allow(null, ""),
   type: joi
-    .number()
+    .string()
     .required()
     .valid(...typeInitiateur),
   role: joi
-    .number()
+    .string()
     .required()
     .valid(...userRoles),
 });

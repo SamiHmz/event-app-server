@@ -52,21 +52,23 @@ EvenementController.createEvenement = async (req, res) => {
   });
 
   // create the notification
-  const notification = await db.notification_administrateur.create({
-    details: ` a ajouté une nouvelle demande évènement ${evenement.intitulé} `,
-    lien: `/demandes/${evenement.id}`,
-    administrateur_id: administrateur.id,
-    nom: req.user.nom,
-  });
-  // Adminstrateur simple room
-  const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
+  if (administrateur) {
+    const notification = await db.notification_administrateur.create({
+      details: ` a ajouté une nouvelle demande évènement ${evenement.intitulé} `,
+      lien: `/demandes/${evenement.id}`,
+      administrateur_id: administrateur.id,
+      nom: req.user.nom,
+    });
+    // Adminstrateur simple room
+    const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
 
-  // check if the room emty
-  if (req.io.sockets.adapter.rooms.get(room)) {
-    var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
-  }
-  if (!isRoomEmpty) {
-    req.io.to(room).emit("notifications", notification);
+    // check if the room emty
+    if (req.io.sockets.adapter.rooms.get(room)) {
+      var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
+    }
+    if (!isRoomEmpty) {
+      req.io.to(room).emit("notifications", notification);
+    }
   }
 
   res.status(201).send(evenement);
@@ -105,11 +107,21 @@ EvenementController.getAllEvenement = async (req, res) => {
       where: {
         initiateur_id: req.user.id,
       },
-      include: db.type_evenement,
     });
   } else {
     evenements = await db.evenement.findAll({ include: db.type_evenement });
   }
+  res.status(200).send(evenements);
+};
+EvenementController.getAllNotHappenedEventYet = async (req, res) => {
+  var evenements = await db.evenement.findAll({
+    where: {
+      initiateur_id: req.user.id,
+      is_happened: false,
+      etat: etat.APROUVER,
+    },
+    attributes: ["id", "intitulé"],
+  });
   res.status(200).send(evenements);
 };
 
@@ -160,13 +172,14 @@ EvenementController.getAllDemandes = async (req, res) => {
   var offset = (req.params.pageNumber - 1) * limit;
   var demandes = null;
 
-  if (req.user.type === "initiateur") {
+  if (req.user.type === typeUtilisateur.INITIATEUR) {
     demandes = await db.evenement.findAll({
-      limit,
-      offset,
+      limit: limit,
+      offset: offset,
       where: {
         initiateur_id: req.user.id,
       },
+      order: [["createdAt", "DESC"]],
     });
   } else {
     demandes = await db.evenement.findAll({
@@ -176,6 +189,7 @@ EvenementController.getAllDemandes = async (req, res) => {
       include: {
         model: db.initiateur,
       },
+      order: [["createdAt", "DESC"]],
     });
   }
   res.status(200).send(demandes);

@@ -7,6 +7,7 @@ const EvenementController = require("../controllers/evenement.controller");
 const ValidationEvenementController = require("../controllers/validation_evenement.controller");
 const BilanController = require("../controllers/bilan.controller");
 const NotificationController = require("../controllers/notifications.controller");
+const IntervenantController = require("../controllers/intervenant.controller");
 require("express-async-errors");
 
 /************************ Users Routes **************/
@@ -27,6 +28,10 @@ router.get("/demande/:pageNumber", EvenementController.getAllDemandes);
 router.get("/demandes/count", EvenementController.getDemandesCount);
 router.put("/demande/opened/:id", EvenementController.changeDemandeIsOpened);
 router.get("/demande/opened/:id", EvenementController.getIsOpened);
+router.get(
+  "/evenements/nothappened",
+  EvenementController.getAllNotHappenedEventYet
+);
 
 /************************* Evenement Validation *****************/
 
@@ -62,4 +67,15 @@ router.put(
   "/notification/clicked/:id",
   NotificationController.setNotificationToclicked
 );
+/************************* notifications ***********************/
+router.post("/intervenant", IntervenantController.createIntervenant);
+router.get(
+  "/intervenants/:pageNumber",
+  IntervenantController.getAllIntervenant
+);
+router.get("/intervenant/count", IntervenantController.getAllIntervenantCount);
+router.delete("/intervenant/:id", IntervenantController.deleteIntervenant);
+router.get("/intervenant/:id", IntervenantController.getOneIntervenant);
+router.put("/intervenant/:id", IntervenantController.updateIntervenant);
+
 module.exports = router;

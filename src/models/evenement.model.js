@@ -78,6 +78,14 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      is_happened: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
     },
     {
       freezeTableName: true,

@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       decision_admin_simple: {
         type: DataTypes.STRING,
         allowNull: false,
+        defaultValue: etat.ATENTE,
         validate: {
           notEmpty: true,
           isIn: [etatIntervenant],
@@ -14,13 +15,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       details_decision_admin_simple: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
       },
       decision_admin: {
         type: DataTypes.STRING,
+        defaultValue: etat.ATENTE,
         allowNull: false,
         validate: {
           notEmpty: true,
@@ -29,13 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       details_decision_admin: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
       },
       decision_super_admin: {
         type: DataTypes.STRING,
+        defaultValue: etat.ATENTE,
         allowNull: false,
         validate: {
           notEmpty: true,
@@ -44,10 +39,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       details_super_admin: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
       },
     },
     {
