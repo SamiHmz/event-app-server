@@ -1,6 +1,8 @@
 const joi = require("joi");
 const db = require("../models").dbModels;
 const _ = require("lodash");
+const { Op } = require("sequelize");
+
 const { validateId } = require("./controllers.util");
 const {
   sexe,
@@ -39,9 +41,6 @@ IntervenantController.createIntervenant = async (req, res) => {
     return res.status(400).send(result.error.details[0].message);
 
   const intervenant = await db.intervenant.create(body);
-  const validation = await db.validation_intervenant.create({
-    intervenant_id: intervenant.id,
-  });
 
   res.status(200).send(intervenant);
 };
@@ -75,11 +74,8 @@ IntervenantController.getAllIntervenant = async (req, res) => {
       intervenants = await db.intervenant.findAll({
         limit: limit,
         offset: offset,
-        include: {
-          model: db.validation_intervenant,
-          where: {
-            decision_admin_simple: etat.APROUVER,
-          },
+        where: {
+          etat_admin_simple: etat.APROUVER,
         },
         order: [["createdAt", "DESC"]],
       });
@@ -87,11 +83,8 @@ IntervenantController.getAllIntervenant = async (req, res) => {
       intervenants = await db.intervenant.findAll({
         limit: limit,
         offset: offset,
-        include: {
-          model: db.validation_intervenant,
-          where: {
-            decision_admin: etat.APROUVER,
-          },
+        where: {
+          etat_admin: etat.APROUVER,
         },
         order: [["createdAt", "DESC"]],
       });
@@ -118,19 +111,17 @@ IntervenantController.getAllIntervenantCount = async (req, res) => {
       count = await db.intervenant.count();
     } else if (user.role === roles.ADMIN) {
       count = await db.intervenant.count({
-        include: {
-          model: db.validation_intervenant,
-          where: {
-            decision_admin_simple: etat.APROUVER,
+        where: {
+          etat: {
+            [Op.ne]: etat.APROUVER,
           },
         },
       });
     } else {
       count = await db.intervenant.count({
-        include: {
-          model: db.validation_intervenant,
-          where: {
-            decision_admin: etat.APROUVER,
+        where: {
+          etat: {
+            [Op.ne]: etat.APROUVER,
           },
         },
       });
@@ -174,6 +165,9 @@ IntervenantController.getOneIntervenant = async (req, res) => {
       where: {
         id,
       },
+      include: {
+        model: db.evenement,
+      },
     });
   } else {
     intervenant = await db.intervenant.findOne({
@@ -189,12 +183,10 @@ IntervenantController.getOneIntervenant = async (req, res) => {
     });
   }
   if (!intervenant) return res.status(400).send("Intervenant doesn't exist");
-  res.status(200).send(_.omit(intervenant.dataValues, ["evenement"]));
+  res.status(200).send(intervenant);
 };
 IntervenantController.updateIntervenant = async (req, res) => {
   const { body, user } = req;
-  console.log(body);
-
   const id = req.params.id;
   if (!validateId(req, res, id)) return;
 
@@ -223,4 +215,39 @@ IntervenantController.updateIntervenant = async (req, res) => {
   res.status(200).send(_.omit(intervenant.dataValues, ["evenement"]));
 };
 
+IntervenantController.changeIntervenantIsOpened = async (req, res) => {
+  const id = req.params.id;
+  const isOpeninSchema = joi.object({
+    is_opened: joi.boolean().required(),
+  });
+
+  if (!validateId(req, res, id)) return;
+
+  const result = isOpeninSchema.validate(req.body);
+  if (result.error)
+    return res.status(400).send(result.error.details[0].message);
+
+  var intervenant = await db.intervenant.findOne({
+    where: {
+      id,
+    },
+  });
+  if (!intervenant) return res.status(400).send("intervenant doesn't exist");
+  intervenant.is_opened = req.body.is_opened;
+  await intervenant.save();
+  res.status(200).send(intervenant);
+};
+
+IntervenantController.getIntervenantIsOpened = async (req, res) => {
+  const id = req.params.id;
+  if (!validateId(req, res, id)) return;
+
+  var intervenant = await db.intervenant.findOne({
+    where: {
+      id,
+    },
+  });
+  if (!intervenant) return res.status(400).send("intervenant doesn't exist");
+  res.status(200).send(intervenant.is_opened);
+};
 module.exports = IntervenantController;

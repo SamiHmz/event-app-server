@@ -4,41 +4,20 @@ module.exports = (sequelize, DataTypes) => {
   var IntervenantValidation = sequelize.define(
     "validation_intervenant",
     {
-      decision_admin_simple: {
+      details: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: etat.ATENTE,
         validate: {
           notEmpty: true,
-          isIn: [etatIntervenant],
         },
       },
-      details_decision_admin_simple: {
+      etat: {
         type: DataTypes.STRING,
-      },
-      decision_admin: {
-        type: DataTypes.STRING,
-        defaultValue: etat.ATENTE,
         allowNull: false,
         validate: {
           notEmpty: true,
           isIn: [etatIntervenant],
         },
-      },
-      details_decision_admin: {
-        type: DataTypes.STRING,
-      },
-      decision_super_admin: {
-        type: DataTypes.STRING,
-        defaultValue: etat.ATENTE,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-          isIn: [etatIntervenant],
-        },
-      },
-      details_super_admin: {
-        type: DataTypes.STRING,
       },
     },
     {
@@ -49,6 +28,9 @@ module.exports = (sequelize, DataTypes) => {
   IntervenantValidation.associate = (dbModels) => {
     IntervenantValidation.belongsTo(dbModels.intervenant, {
       foreignKey: "intervenant_id",
+    });
+    IntervenantValidation.belongsTo(dbModels.administrateur, {
+      foreignKey: "administrateur_id",
     });
   };
 

@@ -61,6 +61,33 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [etatIntervenant],
         },
       },
+      etat_simple: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: etat.ATENTE,
+        validate: {
+          notEmpty: true,
+          isIn: [etatIntervenant],
+        },
+      },
+      etat_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: etat.ATENTE,
+        validate: {
+          notEmpty: true,
+          isIn: [etatIntervenant],
+        },
+      },
+      etat_super_admin: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: etat.ATENTE,
+        validate: {
+          notEmpty: true,
+          isIn: [etatIntervenant],
+        },
+      },
       type: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -68,6 +95,14 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notEmpty: true,
           isIn: [typeIntervenantValues],
+        },
+      },
+      is_opened: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
         },
       },
     },

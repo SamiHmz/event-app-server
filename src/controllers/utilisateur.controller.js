@@ -93,7 +93,7 @@ UtilisateurController.createNewUser = async (req, res) => {
   user = await db[userType].create(body);
 
   const token = jwt.sign(
-    { id: user.id, role: user.role, type: userType },
+    { id: user.id, role: user.role, type: userType, nom: user.nom },
     process.env.jwtKey
   );
   res.status(201).send(token);

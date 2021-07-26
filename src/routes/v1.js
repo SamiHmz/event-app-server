@@ -8,6 +8,7 @@ const ValidationEvenementController = require("../controllers/validation_eveneme
 const BilanController = require("../controllers/bilan.controller");
 const NotificationController = require("../controllers/notifications.controller");
 const IntervenantController = require("../controllers/intervenant.controller");
+const ValidationIntervenantController = require("../controllers/validation_intervenant.controller");
 require("express-async-errors");
 
 /************************ Users Routes **************/
@@ -67,7 +68,7 @@ router.put(
   "/notification/clicked/:id",
   NotificationController.setNotificationToclicked
 );
-/************************* notifications ***********************/
+/************************* Intervenant ***********************/
 router.post("/intervenant", IntervenantController.createIntervenant);
 router.get(
   "/intervenants/:pageNumber",
@@ -77,5 +78,23 @@ router.get("/intervenant/count", IntervenantController.getAllIntervenantCount);
 router.delete("/intervenant/:id", IntervenantController.deleteIntervenant);
 router.get("/intervenant/:id", IntervenantController.getOneIntervenant);
 router.put("/intervenant/:id", IntervenantController.updateIntervenant);
+router.put(
+  "/intervenant/opened/:id",
+  IntervenantController.changeIntervenantIsOpened
+);
+router.get(
+  "/intervenant/opened/:id",
+  IntervenantController.getIntervenantIsOpened
+);
+
+/*************************Intervenant validation************************/
+router.post(
+  "/intervenants/validation",
+  ValidationIntervenantController.createIntervenantValidation
+);
+router.get(
+  "/intervenants/validations/:id",
+  ValidationIntervenantController.getAllIntervenantValidation
+);
 
 module.exports = router;

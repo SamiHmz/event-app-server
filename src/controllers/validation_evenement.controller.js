@@ -12,7 +12,6 @@ const ValidationEvenementController = {};
 
 ValidationEvenementController.createValidation = async (req, res) => {
   const body = req.body;
-
   const result = schema.validate(body);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
@@ -25,13 +24,13 @@ ValidationEvenementController.createValidation = async (req, res) => {
     return res.status(400).send("This evenement is already validate");
 
   if (body.etat == etat.APROUVER) {
-    evenement.etat = etat.APROUVER;
     body.details = body.details || "Your event is validate successefully";
   } else {
-    evenement.etat = etat.REJETER;
     if (!body.details)
       return res.status(400).send("You must provide details about rejection");
   }
+
+  evenement.etat = body.etat;
   const validation = await db.validation_evenement.create(body);
   await evenement.save();
   // create the notification
@@ -106,7 +105,6 @@ ValidationEvenementController.getOneValidation = async (req, res) => {
 ValidationEvenementController.getAllValidation = async (req, res) => {
   const id = req.params.id;
   if (!validateId(req, res, id)) return;
-  console.log("excuted");
 
   const evenement = await db.evenement.findByPk(id);
   if (!evenement) return res.status(400).send("This evenement doesn't exists");
