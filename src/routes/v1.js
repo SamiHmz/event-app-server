@@ -92,9 +92,21 @@ router.post(
   "/intervenants/validation",
   ValidationIntervenantController.createIntervenantValidation
 );
+router.put(
+  "/intervenants/validation/:id",
+  ValidationIntervenantController.updateIntervenantValidation
+);
 router.get(
   "/intervenants/validations/:id",
   ValidationIntervenantController.getAllIntervenantValidation
+);
+router.get(
+  "/intervenants/validation/:id",
+  ValidationIntervenantController.getOneIntervenantValidation
+);
+router.delete(
+  "/intervenants/validation/:id",
+  ValidationIntervenantController.deleteValidationIntervenant
 );
 
 module.exports = router;

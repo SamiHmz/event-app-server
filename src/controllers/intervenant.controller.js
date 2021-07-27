@@ -42,6 +42,33 @@ IntervenantController.createIntervenant = async (req, res) => {
 
   const intervenant = await db.intervenant.create(body);
 
+  // get  Adminstrateur simple id
+  const administrateur = await db.administrateur.findOne({
+    where: {
+      role: roles.SIMPLE,
+    },
+  });
+
+  // create the notification
+  if (administrateur) {
+    const notification = await db.notification_administrateur.create({
+      details: ` a ajouté un intervenant  ${intervenant.prenom} ${intervenant.nom}  `,
+      lien: `/intervenants/${intervenant.id}`,
+      administrateur_id: administrateur.id,
+      nom: req.user.nom,
+    });
+    // Adminstrateur simple room
+    const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
+
+    // check if the room emty
+    if (req.io.sockets.adapter.rooms.get(room)) {
+      var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
+    }
+    if (!isRoomEmpty) {
+      req.io.to(room).emit("notifications", notification);
+    }
+  }
+
   res.status(200).send(intervenant);
 };
 
@@ -71,11 +98,12 @@ IntervenantController.getAllIntervenant = async (req, res) => {
         order: [["createdAt", "DESC"]],
       });
     } else if (user.role === roles.ADMIN) {
+      console.log("excuted");
       intervenants = await db.intervenant.findAll({
         limit: limit,
         offset: offset,
         where: {
-          etat_admin_simple: etat.APROUVER,
+          etat_simple: etat.APROUVER,
         },
         order: [["createdAt", "DESC"]],
       });
