@@ -11,15 +11,15 @@ const _ = require("lodash");
 
 const schema = joi.object({
   details: joi.string(),
-  intervenant_id: joi.number().required(),
+  sponsoring_id: joi.number().required(),
   etat: joi.string().required().valid(etat.REJETER, etat.APROUVER),
 });
-const ValidationIntervenantController = {};
+const ValidationSponsoringController = {};
 
-const createIntervenantNotification = async (
+const createSponsoringNotification = async (
   req,
   type_utilisateur,
-  intervenant,
+  sponsoring,
   role_admin
 ) => {
   var room = null;
@@ -33,22 +33,23 @@ const createIntervenantNotification = async (
     });
     if (administrateur) {
       notification = await db.notification_administrateur.create({
-        details: ` a ${req.body.etat} un intervenant  ${intervenant.prenom} ${intervenant.nom}  `,
-        lien: `/intervenants/${intervenant.id}`,
+        details: ` a ${req.body.etat} un sponsoring  `,
+        lien: `/sponsorings/${sponsoring.id}`,
         administrateur_id: administrateur.id,
         nom: req.user.nom,
       });
     }
+    console.log("administrateur :", administrateur);
     // Adminstrateur  room
     room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
   } else {
     //get initiateur id
-    const evenement = await db.evenement.findByPk(intervenant.evenement_id);
+    const evenement = await db.evenement.findByPk(sponsoring.evenement_id);
 
     // create initiateur notification
     notification = await db.notification_initiateur.create({
-      details: ` a  ${req.body.etat} votre intervenant ${intervenant.prenom} ${intervenant.nom} `,
-      lien: `/intervenants/${intervenant.id}`,
+      details: ` a  ${req.body.etat} votre sponsoring `,
+      lien: `/sponsorings/${sponsoring.id}`,
       initiateur_id: evenement.initiateur_id,
       nom: req.user.nom,
     });
@@ -66,7 +67,7 @@ const createIntervenantNotification = async (
   }
 };
 
-ValidationIntervenantController.createIntervenantValidation = async (
+ValidationSponsoringController.createSponsoringValidation = async (
   req,
   res
 ) => {
@@ -77,9 +78,9 @@ ValidationIntervenantController.createIntervenantValidation = async (
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
 
-  var intervenant = await db.intervenant.findByPk(body.intervenant_id);
+  var sponsoring = await db.sponsoring.findByPk(body.sponsoring_id);
 
-  if (!intervenant) return res.status(400).send("Intervenant doesn't exist");
+  if (!sponsoring) return res.status(400).send("sponsoring doesn't exist");
 
   if (body.etat == etat.APROUVER) {
     body.details = body.details || "Your event is validate successefully";
@@ -89,58 +90,37 @@ ValidationIntervenantController.createIntervenantValidation = async (
   }
 
   if (user.role === roles.SIMPLE) {
-    intervenant.etat_simple = body.etat;
-    //if intervenant interne
-    if (intervenant.type === typeIntervenant[0]) {
-      intervenant.etat = body.etat;
-    } else {
-      if (body.etat === etat.REJETER) {
-        intervenant.etat = body.etat;
-      } else if (
-        body.etat === etat.APROUVER &&
-        intervenant.etat === etat.REJETER
-      ) {
-        intervenant.etat = etat.ATENTE;
-      }
-      await createIntervenantNotification(
-        req,
-        typeUtilisateur.ADMINISTRATEUR,
-        intervenant,
-        roles.ADMIN
-      );
-    }
-  } else if (user.role === roles.ADMIN) {
-    intervenant.etat_admin = body.etat;
+    sponsoring.etat_simple = body.etat;
     if (body.etat === etat.REJETER) {
-      intervenant.etat = body.etat;
+      sponsoring.etat = body.etat;
     } else if (
       body.etat === etat.APROUVER &&
-      intervenant.etat === etat.REJETER
+      sponsoring.etat === etat.REJETER
     ) {
-      intervenant.etat = etat.ATENTE;
+      sponsoring.etat = etat.ATENTE;
     }
-    await createIntervenantNotification(
+    await createSponsoringNotification(
       req,
       typeUtilisateur.ADMINISTRATEUR,
-      intervenant,
-      roles.SUPER_ADMIN
+      sponsoring,
+      roles.ADMIN
     );
   } else if (user.role === roles.SUPER_ADMIN) {
-    intervenant.etat = body.etat;
+    sponsoring.etat = body.etat;
   }
 
   // initiateur notification
-  await createIntervenantNotification(
+  await createSponsoringNotification(
     req,
     typeUtilisateur.INITIATEUR,
-    intervenant
+    sponsoring
   );
 
-  await intervenant.save();
+  await sponsoring.save();
 
   body.administrateur_id = req.user.id;
-  var validation = await db.validation_intervenant.create(body);
-  validation = await db.validation_intervenant.findByPk(validation.id, {
+  var validation = await db.validation_sponsoring.create(body);
+  validation = await db.validation_sponsoring.findByPk(validation.id, {
     include: {
       model: db.administrateur,
       attributes: ["nom"],
@@ -149,7 +129,7 @@ ValidationIntervenantController.createIntervenantValidation = async (
   res.status(201).send(validation);
 };
 
-ValidationIntervenantController.updateIntervenantValidation = async (
+ValidationSponsoringController.updateSponsoringValidation = async (
   req,
   res
 ) => {
@@ -161,12 +141,11 @@ ValidationIntervenantController.updateIntervenantValidation = async (
   const result = schema.validate(body);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
-  var intervenant = await db.intervenant.findByPk(body.intervenant_id);
+  var sponsoring = await db.sponsoring.findByPk(body.sponsoring_id);
 
-  if (!intervenant) return res.status(400).send("Intervenant doesn't exist");
-  console.log("validation itrevenant id", id);
+  if (!sponsoring) return res.status(400).send("Sponsoring doesn't exist");
 
-  const validation = await db.validation_intervenant.findByPk(id);
+  const validation = await db.validation_sponsoring.findByPk(id);
   if (!validation)
     return res.status(400).send("This validation doesn't exists");
 
@@ -175,50 +154,38 @@ ValidationIntervenantController.updateIntervenantValidation = async (
   });
 
   if (user.role === roles.SIMPLE) {
-    intervenant.etat_simple = body.etat;
-    //if intervenant interne
-    if (intervenant.type === typeIntervenant[0]) {
-      intervenant.etat = body.etat;
-    } else if (body.etat === etat.REJETER) {
-      intervenant.etat = body.etat;
-    } else if (
-      body.etat === etat.APROUVER &&
-      intervenant.etat === etat.REJETER
-    ) {
-      intervenant.etat = etat.ATENTE;
-    }
-  } else if (user.role === roles.ADMIN) {
-    intervenant.etat_admin = body.etat;
+    sponsoring.etat_simple = body.etat;
     if (body.etat === etat.REJETER) {
-      intervenant.etat = body.etat;
+      sponsoring.etat = body.etat;
     } else if (
       body.etat === etat.APROUVER &&
-      intervenant.etat === etat.REJETER
+      sponsoring.etat === etat.REJETER
     ) {
-      intervenant.etat = etat.ATENTE;
+      sponsoring.etat = etat.ATENTE;
     }
   } else if (user.role === roles.SUPER_ADMIN) {
-    intervenant.etat = body.etat;
+    sponsoring.etat = body.etat;
   }
-  await intervenant.save();
+
+  await sponsoring.save();
   await validation.save();
   res.status(200).send(validation);
 };
-ValidationIntervenantController.getAllIntervenantValidation = async (
+
+ValidationSponsoringController.getAllSponsoringValidation = async (
   req,
   res
 ) => {
-  const { user } = req;
   const id = req.params.id;
   if (!validateId(req, res, id)) return;
 
-  const intervenant = await db.intervenant.findByPk(id);
-  if (!intervenant)
-    return res.status(400).send("This intervenant doesn't exists");
+  const sponsoring = await db.sponsoring.findByPk(id);
+  if (!sponsoring)
+    return res.status(400).send("This sponsoring doesn't exists");
 
-  const validations = await db.validation_intervenant.findAll({
+  const validations = await db.validation_sponsoring.findAll({
     where: {
-      intervenant_id: id,
+      sponsoring_id: id,
     },
     include: {
       model: db.administrateur,
@@ -229,52 +196,52 @@ ValidationIntervenantController.getAllIntervenantValidation = async (
 
   res.status(200).send(validations);
 };
-ValidationIntervenantController.getOneIntervenantValidation = async (
+ValidationSponsoringController.getOneSponsoringValidation = async (
   req,
   res
 ) => {
   const id = req.params.id;
   if (!validateId(req, res, id)) return;
-  const validation = await db.validation_intervenant.findByPk(id);
+  const validation = await db.validation_sponsoring.findByPk(id);
   if (!validation)
     return res.status(400).send("This validation doesn't exists");
 
   res.status(200).send(validation);
 };
 
-ValidationIntervenantController.deleteValidationIntervenant = async (
+ValidationSponsoringController.deleteValidationSponsoring = async (
   req,
   res
 ) => {
   const { id } = req.params;
   const { user } = req;
   if (!validateId(req, res, id)) return;
-  // check if the validation exists
-  const validation = await db.validation_intervenant.findByPk(id);
+  //   check if the validation exists
+  const validation = await db.validation_sponsoring.findByPk(id);
   if (!validation)
     return res.status(400).send("This validation doesn't exists");
-  // get the intervenant
-  const intervenant = await db.intervenant.findByPk(validation.intervenant_id);
+  //   get the sponsoring
+  const sponsoring = await db.sponsoring.findByPk(validation.sponsoring_id);
 
-  const validations = await db.validation_intervenant.findAll({
+  const validations = await db.validation_sponsoring.findAll({
     where: {
-      intervenant_id: validation.intervenant_id,
+      sponsoring_id: validation.sponsoring_id,
       administrateur_id: user.id,
     },
     order: [["updatedAt", "DESC"]],
   });
 
   const isLastValidation = validations.length === 1;
-  if (user.role === roles.SUPER_ADMIN) {
+  if (user.role === roles.ADMIN) {
     if (isLastValidation) {
-      intervenant.etat = etat.ATENTE;
+      sponsoring.etat = etat.ATENTE;
     } else {
-      intervenant.etat = validations[1].etat;
+      sponsoring.etat = validations[1].etat;
     }
   }
   await validation.destroy();
-  await intervenant.save();
+  await sponsoring.save();
   res.status(200).send(validations);
 };
 
-module.exports = ValidationIntervenantController;
+module.exports = ValidationSponsoringController;

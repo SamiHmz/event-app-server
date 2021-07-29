@@ -79,15 +79,6 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [etatIntervenant],
         },
       },
-      etat_super_admin: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: etat.ATENTE,
-        validate: {
-          notEmpty: true,
-          isIn: [etatIntervenant],
-        },
-      },
       type: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -112,7 +103,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Intervenant.associate = (dbModels) => {
-    Intervenant.hasOne(dbModels.validation_intervenant, {
+    Intervenant.hasMany(dbModels.validation_intervenant, {
       foreignKey: "intervenant_id",
     });
     Intervenant.belongsTo(dbModels.evenement, {

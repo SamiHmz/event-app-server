@@ -67,6 +67,9 @@ module.exports = (sequelize, DataTypes) => {
     Administrateur.hasMany(dbModels.validation_intervenant, {
       foreignKey: "administrateur_id",
     });
+    Administrateur.hasMany(dbModels.validation_sponsoring, {
+      foreignKey: "administrateur_id",
+    });
   };
   return Administrateur;
 };

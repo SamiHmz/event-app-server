@@ -9,6 +9,8 @@ const BilanController = require("../controllers/bilan.controller");
 const NotificationController = require("../controllers/notifications.controller");
 const IntervenantController = require("../controllers/intervenant.controller");
 const ValidationIntervenantController = require("../controllers/validation_intervenant.controller");
+const SponsoringController = require("../controllers/sponsoring.controller");
+const ValidationSponsoringController = require("../controllers/validation_sponsoring.controller");
 require("express-async-errors");
 
 /************************ Users Routes **************/
@@ -107,6 +109,46 @@ router.get(
 router.delete(
   "/intervenants/validation/:id",
   ValidationIntervenantController.deleteValidationIntervenant
+);
+
+/************************* Sponsoring ************************/
+router.post("/sponsoring", SponsoringController.createSponsoring);
+router.put(
+  "/sponsoring/opened/:id",
+  SponsoringController.changeSponsoringIsOpened
+);
+router.get(
+  "/sponsoring/opened/:id",
+  SponsoringController.getSponsoringIsOpened
+);
+router.get("/sponsorings/:pageNumber", SponsoringController.getAllSponsoring);
+router.get("/sponsoring/count", SponsoringController.getAllSponsoringCount);
+router.get("/sponsoring/:id", SponsoringController.getOneSponsoring);
+
+router.delete("/sponsoring/:id", SponsoringController.deleteSponsoring);
+router.put("/sponsoring/:id", SponsoringController.updateSponsoring);
+
+/************************* Sponsoring Validation ************************/
+
+router.post(
+  "/sponsorings/validation",
+  ValidationSponsoringController.createSponsoringValidation
+);
+router.put(
+  "/sponsorings/validation/:id",
+  ValidationSponsoringController.updateSponsoringValidation
+);
+router.get(
+  "/sponsorings/validations/:id",
+  ValidationSponsoringController.getAllSponsoringValidation
+);
+router.get(
+  "/sponsorings/validation/:id",
+  ValidationSponsoringController.getOneSponsoringValidation
+);
+router.delete(
+  "/sponsorings/validation/:id",
+  ValidationSponsoringController.deleteValidationSponsoring
 );
 
 module.exports = router;
