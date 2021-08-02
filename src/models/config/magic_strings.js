@@ -26,7 +26,7 @@ const typeUtilisateur = {
 };
 const typeInitiateur = ["club", "association"];
 const modeEvenement = ["Prèsentiel", "En Ligne"];
-const typeIntervenant = ["interne", "externe"];
+const typeIntervenant = ["interne", "externe", "journalist"];
 
 const modeSponsoring = ["espèce", "matériel"];
 const media = ["tv", "radio", "journal", "journal", "jouranl en ligne"];

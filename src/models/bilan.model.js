@@ -1,20 +1,15 @@
+var { etat } = require("./config/magic_strings");
+const etatBilan = Object.values(etat);
+
 module.exports = (sequelize, DataTypes) => {
   var Bilan = sequelize.define(
     "bilan",
     {
       article: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
+        type: DataTypes.TEXT,
       },
       ppt_presentation: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
       },
       participants_intern: {
         type: DataTypes.STRING,
@@ -26,13 +21,17 @@ module.exports = (sequelize, DataTypes) => {
       },
       participants_extern: {
         type: DataTypes.STRING,
+      },
+      etat: {
+        type: DataTypes.STRING,
         allowNull: false,
+        defaultValue: etat.ATENTE,
         validate: {
-          isNumeric: true,
           notEmpty: true,
+          isIn: [etatBilan],
         },
       },
-      problem: DataTypes.STRING,
+      problem: DataTypes.TEXT,
     },
     {
       freezeTableName: true,

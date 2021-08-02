@@ -34,6 +34,7 @@ const intervenantSchema = joi.object({
   evenement_id: joi.number().required(),
 });
 
+const typeIntervenantExterne = typeIntervenant[1];
 IntervenantController.createIntervenant = async (req, res) => {
   const { body } = req;
   const result = intervenantSchema.validate(body);
@@ -98,12 +99,12 @@ IntervenantController.getAllIntervenant = async (req, res) => {
         order: [["createdAt", "DESC"]],
       });
     } else if (user.role === roles.ADMIN) {
-      console.log("excuted");
       intervenants = await db.intervenant.findAll({
         limit: limit,
         offset: offset,
         where: {
           etat_simple: etat.APROUVER,
+          type: typeIntervenantExterne,
         },
         order: [["createdAt", "DESC"]],
       });
@@ -113,6 +114,7 @@ IntervenantController.getAllIntervenant = async (req, res) => {
         offset: offset,
         where: {
           etat_admin: etat.APROUVER,
+          type: typeIntervenantExterne,
         },
         order: [["createdAt", "DESC"]],
       });

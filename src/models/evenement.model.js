@@ -93,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Evenement.associate = (dbModels) => {
-    Evenement.hasOne(dbModels.bilan, { foreignKey: "evenement_id" });
+    Evenement.hasMany(dbModels.bilan, { foreignKey: "evenement_id" });
     Evenement.hasMany(dbModels.validation_evenement, {
       foreignKey: "evenement_id",
     });

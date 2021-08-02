@@ -1,6 +1,5 @@
 // modules
 const Express = require("express");
-
 const logger = require("morgan");
 const sequelize = require("./src/models");
 const router = require("./src/routes/v1");

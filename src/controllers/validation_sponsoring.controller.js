@@ -33,7 +33,7 @@ const createSponsoringNotification = async (
     });
     if (administrateur) {
       notification = await db.notification_administrateur.create({
-        details: ` a ${req.body.etat} un sponsoring  `,
+        details: ` a ajouté un sponsoring  `,
         lien: `/sponsorings/${sponsoring.id}`,
         administrateur_id: administrateur.id,
         nom: req.user.nom,

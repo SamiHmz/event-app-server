@@ -49,9 +49,11 @@ router.delete(
 
 /*************************** bilan ********************/
 router.post("/bilan", BilanController.createBilan);
+router.put("/bilan/validate/:id", BilanController.validateBilan);
 router.put("/bilan/:id", BilanController.updateBilan);
 router.get("/bilan/:id", BilanController.getOneBilan);
-router.get("/bilans", BilanController.getAllBilans);
+router.get("/bilans/count", BilanController.getAllbilanCount);
+router.get("/bilans/:pageNumber", BilanController.getAllBilans);
 router.delete("/bilan/:id", BilanController.deleteBilan);
 
 /************************* notifications ***********************/

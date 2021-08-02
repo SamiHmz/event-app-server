@@ -15,7 +15,8 @@ const schema = joi.object({
   etat: joi.string().required().valid(etat.REJETER, etat.APROUVER),
 });
 const ValidationIntervenantController = {};
-
+const typeIntervenantInterne = typeIntervenant[0];
+const typeIntervenantJournalist = typeIntervenant[2];
 const createIntervenantNotification = async (
   req,
   type_utilisateur,
@@ -91,7 +92,10 @@ ValidationIntervenantController.createIntervenantValidation = async (
   if (user.role === roles.SIMPLE) {
     intervenant.etat_simple = body.etat;
     //if intervenant interne
-    if (intervenant.type === typeIntervenant[0]) {
+    if (
+      intervenant.type === typeIntervenantInterne ||
+      intervenant.type === typeIntervenantJournalist
+    ) {
       intervenant.etat = body.etat;
     } else {
       if (body.etat === etat.REJETER) {

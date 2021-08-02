@@ -198,24 +198,14 @@ EvenementController.getAllDemandes = async (req, res) => {
 EvenementController.getDemandesCount = async (req, res) => {
   var count = 0;
 
-  if (req.user.type === "initiateur") {
+  if (req.user.type === typeUtilisateur.INITIATEUR) {
     count = await db.evenement.count({
       where: {
         initiateur_id: req.user.id,
-        etat: {
-          [Op.ne]: etat.APROUVER,
-        },
       },
     });
   } else {
-    count = await db.evenement.count({
-      where: {
-        etat: {
-          [Op.ne]: etat.APROUVER,
-        },
-      },
-      include: db.type_evenement,
-    });
+    count = await db.evenement.count();
   }
   res.status(200).send({ count });
 };
