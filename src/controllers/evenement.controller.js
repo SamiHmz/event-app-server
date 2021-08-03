@@ -169,8 +169,11 @@ EvenementController.deleteEvenement = async (req, res) => {
 
 EvenementController.getAllDemandes = async (req, res) => {
   // calculate the request page number offset
-  var offset = (req.params.pageNumber - 1) * limit;
-  var demandes = null;
+  var { pageNumber } = req.params;
+  var offset = (pageNumber - 1) * limit;
+
+  const filter = JSON.parse(req.params.filter);
+  console.log("filter :", filter);
 
   if (req.user.type === typeUtilisateur.INITIATEUR) {
     demandes = await db.evenement.findAll({
@@ -178,17 +181,33 @@ EvenementController.getAllDemandes = async (req, res) => {
       offset: offset,
       where: {
         initiateur_id: req.user.id,
+        ...filter,
       },
       order: [["createdAt", "DESC"]],
     });
   } else {
+    var searchParams = {};
+    if (filter.initiateur) {
+      searchParams = {
+        include: {
+          model: db.initiateur,
+          where: {
+            nom: filter.initiateur,
+          },
+        },
+      };
+    } else {
+      searchParams = {
+        where: { ...filter },
+        include: {
+          model: db.initiateur,
+        },
+      };
+    }
     demandes = await db.evenement.findAll({
       limit: limit,
       offset: offset,
-      where: {},
-      include: {
-        model: db.initiateur,
-      },
+      ...searchParams,
       order: [["createdAt", "DESC"]],
     });
   }
