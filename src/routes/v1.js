@@ -17,7 +17,9 @@ require("express-async-errors");
 router.post("/signup/:type", UtilisateurController.createNewUser);
 router.post("/login/:type", UtilisateurController.authenticateUser);
 router.get("/user/:type/:id", UtilisateurController.getOneUser);
-router.get("/users/:type", UtilisateurController.getAllUsers);
+router.delete("/user/:type/:id", UtilisateurController.deleteUser);
+router.get("/users/count", UtilisateurController.getAllUserCount);
+router.get("/users/:pageNumber", UtilisateurController.getAllUsers);
 router.put("/user/:type/:id", UtilisateurController.updateUser);
 
 /*************************Evenement Routes ******************/

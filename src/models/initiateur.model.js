@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
-      numero: {
+      telephone: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: {
@@ -43,14 +43,6 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       photo: DataTypes.STRING,
-      role: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-          isIn: [initiateurRoles],
-        },
-      },
       type: {
         type: DataTypes.STRING,
         allowNull: false,

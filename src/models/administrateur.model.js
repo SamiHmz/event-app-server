@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
-      numero: {
+      telephone: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: {

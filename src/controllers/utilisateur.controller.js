@@ -11,6 +11,7 @@ const userRoles = Object.values(roles);
 require("dotenv").config();
 
 const db = require("../models").dbModels;
+var limit = 10;
 
 const schema = {};
 const UtilisateurController = {};
@@ -23,16 +24,12 @@ var initiateurSchema = joi.object({
   nom: joi.string().required(),
   email: joi.string().email().required(),
   password: joi.string().required(),
-  numero: joi.number().required(),
+  telephone: joi.number().required(),
   photo: joi.string().allow(null, ""),
   type: joi
     .string()
     .required()
     .valid(...typeInitiateur),
-  role: joi
-    .string()
-    .required()
-    .valid(...userRoles),
 });
 
 var administrateurSchema = joi.object({
@@ -40,7 +37,7 @@ var administrateurSchema = joi.object({
   prenom: joi.string().required(),
   email: joi.string().email().required(),
   password: joi.string().required(),
-  numero: joi.number().required(),
+  telephone: joi.number().required(),
   photo: joi.string().allow(null, ""),
   role: joi
     .number()
@@ -76,7 +73,6 @@ UtilisateurController.createNewUser = async (req, res) => {
   result = typeSchema.validate({ type: userType });
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
-
   //validate the body of the request
   if (userType === typeUtilisateur.INITIATEUR) {
     result = initiateurSchema.validate(body);
@@ -92,11 +88,11 @@ UtilisateurController.createNewUser = async (req, res) => {
   //create the user
   user = await db[userType].create(body);
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role, type: userType, nom: user.nom },
-    process.env.jwtKey
-  );
-  res.status(201).send(token);
+  // const token = jwt.sign(
+  //   { id: user.id, role: user.role, type: userType, nom: user.nom },
+  //   process.env.jwtKey
+  // );
+  res.status(201).send(user);
 };
 
 UtilisateurController.authenticateUser = async (req, res) => {
@@ -148,32 +144,77 @@ UtilisateurController.getOneUser = async (req, res) => {
 };
 
 UtilisateurController.getAllUsers = async (req, res) => {
-  const userType = req.params.type;
+  var offset = (req.params.pageNumber - 1) * limit;
 
-  // validate user type url param
-  result = typeSchema.validate({ type: userType });
-  if (result.error)
-    return res.status(400).send(result.error.details[0].message);
+  var users = await db.initiateur.findAll({
+    limit: limit,
+    offset: offset,
+    attributes: { exclude: ["password"] },
+  });
 
-  var users = await db[userType].findAll();
-
-  if (users.length == 0)
-    return res.status(400).send("Theres is no user registred");
-
-  users = users.map((user) => _.omit(user.dataValues, ["password"]));
   res.status(200).send(users);
 };
 
 UtilisateurController.updateUser = async (req, res) => {
+  var { body } = req;
+  var initiateurupdateSchema = joi.object({
+    nom: joi.string().required(),
+    email: joi.string().email().required(),
+    password: joi.string(),
+    telephone: joi.number().required(),
+    photo: joi.string().allow(null, ""),
+    type: joi
+      .string()
+      .required()
+      .valid(...typeInitiateur),
+  });
+
+  // validate url params
+  var result = typeAndIdSchema.validate(req.params);
+  if (result.error)
+    return res.status(400).send(result.error.details[0].message);
+  //check body
+  result = initiateurupdateSchema.validate(body);
+  if (result.error)
+    return res.status(400).send(result.error.details[0].message);
+
+  // check user existence
+  const user = await db[req.params.type].findByPk(req.params.id);
+  if (!user) return res.status(400).send("this user doesn't exits");
+  if (body.password) {
+    const salt = await bcrypt.genSalt(10);
+    body.password = await bcrypt.hash(body.password, salt);
+  } else {
+    body = _.omit(body, ["password"]);
+  }
+  Object.keys(body).forEach((prop) => {
+    user[prop] = body[prop];
+  });
+  await user.save();
+  res.status(200).send(_.omit(user.dataValues, ["password"]));
+};
+
+UtilisateurController.getAllUserCount = async (req, res) => {
+  var count = 0;
+
+  count = await db.initiateur.count();
+
+  res.status(200).send({ count });
+};
+
+UtilisateurController.deleteUser = async (req, res) => {
   // validate url params
   const result = typeAndIdSchema.validate(req.params);
   if (result.error)
     return res.status(400).send(result.error.details[0].message);
   // check user existence
   const user = await db[req.params.type].findByPk(req.params.id);
+
   if (!user) return res.status(400).send("this user doesn't exits");
 
-  // validate body
+  await user.destroy();
+
+  res.status(200).send(_.omit(user.dataValues, ["password"]));
 };
 
 module.exports = UtilisateurController;
