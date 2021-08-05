@@ -3,7 +3,7 @@ const db = require("../models").dbModels;
 const _ = require("lodash");
 const { Op } = require("sequelize");
 
-const { validateId } = require("./controllers.util");
+const { validateId, generateSearchQuery } = require("./controllers.util");
 const {
   sexe,
   etat,
@@ -78,11 +78,20 @@ IntervenantController.getAllIntervenant = async (req, res) => {
   var limit = 10;
   var offset = (req.params.pageNumber - 1) * limit;
 
+  const search = JSON.parse(req.params.search);
+  const filter = JSON.parse(req.params.filter);
+
+  var querySearch = generateSearchQuery(search);
+
   var intervenants = null;
   if (user.type === typeUtilisateur.INITIATEUR) {
     intervenants = await db.intervenant.findAll({
       limit: limit,
       offset: offset,
+      where: {
+        ...filter,
+        ...querySearch,
+      },
       include: {
         model: db.evenement,
         where: {
@@ -96,6 +105,10 @@ IntervenantController.getAllIntervenant = async (req, res) => {
       intervenants = await db.intervenant.findAll({
         limit: limit,
         offset: offset,
+        where: {
+          ...filter,
+          ...querySearch,
+        },
         order: [["createdAt", "DESC"]],
       });
     } else if (user.role === roles.ADMIN) {
@@ -105,6 +118,8 @@ IntervenantController.getAllIntervenant = async (req, res) => {
         where: {
           etat_simple: etat.APROUVER,
           type: typeIntervenantExterne,
+          ...filter,
+          ...querySearch,
         },
         order: [["createdAt", "DESC"]],
       });
@@ -115,6 +130,8 @@ IntervenantController.getAllIntervenant = async (req, res) => {
         where: {
           etat_admin: etat.APROUVER,
           type: typeIntervenantExterne,
+          ...filter,
+          ...querySearch,
         },
         order: [["createdAt", "DESC"]],
       });

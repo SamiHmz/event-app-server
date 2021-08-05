@@ -9,7 +9,7 @@ const {
   typeUtilisateur,
 } = require("../models/config/magic_strings");
 
-const { validateId } = require("./controllers.util");
+const { validateId, generateSearchQuery } = require("./controllers.util");
 
 const EvenementController = {};
 
@@ -172,8 +172,10 @@ EvenementController.getAllDemandes = async (req, res) => {
   var { pageNumber } = req.params;
   var offset = (pageNumber - 1) * limit;
 
+  const search = JSON.parse(req.params.search);
   const filter = JSON.parse(req.params.filter);
-  console.log("filter :", filter);
+
+  var querySearch = generateSearchQuery(search);
 
   if (req.user.type === typeUtilisateur.INITIATEUR) {
     demandes = await db.evenement.findAll({
@@ -181,29 +183,32 @@ EvenementController.getAllDemandes = async (req, res) => {
       offset: offset,
       where: {
         initiateur_id: req.user.id,
+        ...querySearch,
         ...filter,
       },
       order: [["createdAt", "DESC"]],
     });
   } else {
     var searchParams = {};
-    if (filter.initiateur) {
+    if (search.initiateur) {
       searchParams = {
+        where: { ...filter },
         include: {
           model: db.initiateur,
           where: {
-            nom: filter.initiateur,
+            ...querySearch,
           },
         },
       };
     } else {
       searchParams = {
-        where: { ...filter },
+        where: { ...querySearch, ...filter },
         include: {
           model: db.initiateur,
         },
       };
     }
+
     demandes = await db.evenement.findAll({
       limit: limit,
       offset: offset,

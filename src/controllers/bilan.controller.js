@@ -1,7 +1,7 @@
 const joi = require("joi");
 const db = require("../models").dbModels;
 const _ = require("lodash");
-const { validateId } = require("./controllers.util");
+const { validateId, generateSearchQuery } = require("./controllers.util");
 const {
   typeEvenement,
   modeEvenement,
@@ -13,7 +13,7 @@ const BilanController = {};
 
 const schema = joi.object({
   article: joi.string(),
-  ppt_presentation: joi.string(),
+  ppt_presentation: joi.string().allow(""),
   participants_intern: joi.number().required(),
   participants_extern: joi.number(),
   evenement_id: joi.number().required(),
@@ -23,7 +23,7 @@ const schema = joi.object({
 
 var limit = 10;
 
-const createSponsoringNotification = async (req, type_utilisateur, bilan) => {
+const createBilanNotification = async (req, type_utilisateur, bilan) => {
   var room = null;
   var notification = null;
   if (type_utilisateur === typeUtilisateur.ADMINISTRATEUR) {
@@ -93,11 +93,7 @@ BilanController.createBilan = async (req, res) => {
   body.photo.forEach(async (photo) => {
     await db.bilan_photo.create({ bilan_id: bilan.id, lien: photo });
   });
-  await createSponsoringNotification(
-    req,
-    typeUtilisateur.ADMINISTRATEUR,
-    bilan
-  );
+  await createBilanNotification(req, typeUtilisateur.ADMINISTRATEUR, bilan);
 
   res.status(201).send(bilan);
 };
@@ -199,24 +195,62 @@ BilanController.getAllBilans = async (req, res) => {
   var bilans = null;
   const { user } = req;
 
+  const search = JSON.parse(req.params.search);
+  const filter = JSON.parse(req.params.filter);
+  var evenementQuery = {};
+  var initiateurQuery = {};
+
+  if (search.initiateur) {
+    initiateurQuery = generateSearchQuery(search);
+  } else if (search.èvenement) {
+    evenementQuery = generateSearchQuery(search);
+  }
+
+  console.log("evenementQuery:", evenementQuery);
+  console.log("initiateurQuery:", initiateurQuery);
+
   if (user.type === typeUtilisateur.ADMINISTRATEUR) {
     bilans = await db.bilan.findAll({
       include: {
         model: db.evenement,
+        where: {
+          ...evenementQuery,
+        },
+        include: {
+          model: db.initiateur,
+          where: { ...initiateurQuery },
+          attributes: ["nom"],
+        },
+        attributes: ["intitulé"],
       },
       limit: limit,
       offset: offset,
+      where: {
+        ...filter,
+      },
     });
   } else {
     bilans = await db.bilan.findAll({
       include: {
         model: db.evenement,
         where: {
+          ...evenementQuery,
+        },
+        include: {
+          model: db.initiateur,
+          where: { ...initiateurQuery },
+          attributes: ["nom"],
+        },
+        where: {
           initiateur_id: req.user.id,
         },
+        attributes: ["intitulé"],
       },
       limit: limit,
       offset: offset,
+      where: {
+        ...filter,
+      },
     });
   }
   res.status(200).send(bilans);
@@ -305,7 +339,7 @@ BilanController.validateBilan = async (req, res) => {
   }
   await bilan.save();
   await evenement.save();
-  await createSponsoringNotification(req, typeUtilisateur.INITIATEUR, bilan);
+  await createBilanNotification(req, typeUtilisateur.INITIATEUR, bilan);
 
   res.status(200).send(bilan);
 };

@@ -19,7 +19,10 @@ router.post("/login/:type", UtilisateurController.authenticateUser);
 router.get("/user/:type/:id", UtilisateurController.getOneUser);
 router.delete("/user/:type/:id", UtilisateurController.deleteUser);
 router.get("/users/count", UtilisateurController.getAllUserCount);
-router.get("/users/:pageNumber", UtilisateurController.getAllUsers);
+router.get(
+  "/users/:pageNumber/:search/:filter",
+  UtilisateurController.getAllUsers
+);
 router.put("/user/:type/:id", UtilisateurController.updateUser);
 
 /*************************Evenement Routes ******************/
@@ -29,10 +32,13 @@ router.get("/evenement/:id", EvenementController.getOneEvenement);
 router.get("/evenement/", EvenementController.getAllEvenement);
 router.put("/evenement/:id", EvenementController.updateEvenement);
 router.delete("/evenement/:id", EvenementController.deleteEvenement);
-router.get("/demande/:pageNumber/:filter", EvenementController.getAllDemandes);
-router.get("/demandes/count", EvenementController.getDemandesCount);
 router.put("/demande/opened/:id", EvenementController.changeDemandeIsOpened);
 router.get("/demande/opened/:id", EvenementController.getIsOpened);
+router.get(
+  "/demande/:pageNumber/:search/:filter",
+  EvenementController.getAllDemandes
+);
+router.get("/demandes/count", EvenementController.getDemandesCount);
 router.get(
   "/evenements/nothappened",
   EvenementController.getAllNotHappenedEventYet
@@ -55,7 +61,7 @@ router.put("/bilan/validate/:id", BilanController.validateBilan);
 router.put("/bilan/:id", BilanController.updateBilan);
 router.get("/bilan/:id", BilanController.getOneBilan);
 router.get("/bilans/count", BilanController.getAllbilanCount);
-router.get("/bilans/:pageNumber", BilanController.getAllBilans);
+router.get("/bilans/:pageNumber/:search/:filter", BilanController.getAllBilans);
 router.delete("/bilan/:id", BilanController.deleteBilan);
 
 /************************* notifications ***********************/
@@ -77,7 +83,7 @@ router.put(
 /************************* Intervenant ***********************/
 router.post("/intervenant", IntervenantController.createIntervenant);
 router.get(
-  "/intervenants/:pageNumber",
+  "/intervenants/:pageNumber/:search/:filter",
   IntervenantController.getAllIntervenant
 );
 router.get("/intervenant/count", IntervenantController.getAllIntervenantCount);
@@ -125,7 +131,10 @@ router.get(
   "/sponsoring/opened/:id",
   SponsoringController.getSponsoringIsOpened
 );
-router.get("/sponsorings/:pageNumber", SponsoringController.getAllSponsoring);
+router.get(
+  "/sponsorings/:pageNumber/:search/:filter",
+  SponsoringController.getAllSponsoring
+);
 router.get("/sponsoring/count", SponsoringController.getAllSponsoringCount);
 router.get("/sponsoring/:id", SponsoringController.getOneSponsoring);
 

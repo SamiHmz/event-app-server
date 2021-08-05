@@ -1,5 +1,6 @@
 const joi = require("joi");
 const db = require("../models").dbModels;
+const { Op } = require("sequelize");
 
 const util = {};
 
@@ -13,9 +14,23 @@ util.validateId = (req, res, id) => {
   return true;
 };
 
-// util.checkIfExists = async (req,res,id,model) => {
-//   const result = await db[model].findByPk(id);
-//   if (!result) res.status(400).send("This result doesn't exists");
-//   return result
-// };
+util.generateSearchQuery = (search) => {
+  var querySearch = {};
+  Object.keys(search).forEach((key) => {
+    if (key == "initiateur") {
+      querySearch["nom"] = {
+        [Op.iLike]: `%${search[key]}%`,
+      };
+    } else if (key == "èvenement") {
+      querySearch["intitulé"] = {
+        [Op.iLike]: `%${search[key]}%`,
+      };
+    } else {
+      querySearch[key] = {
+        [Op.iLike]: `%${search[key]}%`,
+      };
+    }
+  });
+  return querySearch;
+};
 module.exports = util;

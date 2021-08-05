@@ -7,6 +7,7 @@ const {
   typeInitiateur,
   typeUtilisateur,
 } = require("../models/config/magic_strings");
+const { generateSearchQuery } = require("./controllers.util");
 const userRoles = Object.values(roles);
 require("dotenv").config();
 
@@ -145,10 +146,17 @@ UtilisateurController.getOneUser = async (req, res) => {
 
 UtilisateurController.getAllUsers = async (req, res) => {
   var offset = (req.params.pageNumber - 1) * limit;
+  const search = JSON.parse(req.params.search);
+  const filter = JSON.parse(req.params.filter);
+  var searchQuery = generateSearchQuery(search);
 
   var users = await db.initiateur.findAll({
     limit: limit,
     offset: offset,
+    where: {
+      ...filter,
+      ...searchQuery,
+    },
     attributes: { exclude: ["password"] },
   });
 

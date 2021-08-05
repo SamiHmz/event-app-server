@@ -3,7 +3,7 @@ const db = require("../models").dbModels;
 const _ = require("lodash");
 const { Op } = require("sequelize");
 
-const { validateId } = require("./controllers.util");
+const { validateId, generateSearchQuery } = require("./controllers.util");
 const {
   etat,
   roles,
@@ -66,16 +66,34 @@ SponsoringController.getAllSponsoring = async (req, res) => {
   const { user } = req;
   var limit = 10;
   var offset = (req.params.pageNumber - 1) * limit;
+  const search = JSON.parse(req.params.search);
+  const filter = JSON.parse(req.params.filter);
+  var sponsoringQuery = {};
+  var evenementQuery = {};
+  var initiateurQuery = {};
+
+  if (search.initiateur) {
+    initiateurQuery = generateSearchQuery(search);
+  } else if (search.èvenement) {
+    evenementQuery = generateSearchQuery(search);
+  } else {
+    sponsoringQuery = generateSearchQuery(search);
+  }
 
   var sponsorings = null;
   if (user.type === typeUtilisateur.INITIATEUR) {
     sponsorings = await db.sponsoring.findAll({
       limit: limit,
       offset: offset,
+      where: {
+        ...filter,
+        ...sponsoringQuery,
+      },
       include: {
         model: db.evenement,
         where: {
           initiateur_id: user.id,
+          ...evenementQuery,
         },
       },
       order: [["createdAt", "DESC"]],
@@ -85,20 +103,49 @@ SponsoringController.getAllSponsoring = async (req, res) => {
       sponsorings = await db.sponsoring.findAll({
         limit: limit,
         offset: offset,
+        where: {
+          ...filter,
+          ...sponsoringQuery,
+        },
         order: [["createdAt", "DESC"]],
         include: {
           model: db.evenement,
+          where: {
+            ...evenementQuery,
+          },
+          attributes: ["intitulé"],
+          include: {
+            model: db.initiateur,
+            where: {
+              ...initiateurQuery,
+            },
+            attributes: ["nom"],
+          },
         },
       });
     } else if (user.role === roles.ADMIN) {
       sponsorings = await db.sponsoring.findAll({
         limit: limit,
         offset: offset,
+
         where: {
           etat_simple: etat.APROUVER,
+          ...filter,
+          ...sponsoringQuery,
         },
         include: {
           model: db.evenement,
+          where: {
+            ...evenementQuery,
+          },
+          attributes: ["intitulé"],
+          include: {
+            model: db.initiateur,
+            where: {
+              ...initiateurQuery,
+            },
+            attributes: ["nom"],
+          },
         },
         order: [["createdAt", "DESC"]],
       });
