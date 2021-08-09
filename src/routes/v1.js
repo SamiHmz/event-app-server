@@ -27,9 +27,12 @@ router.put("/user/:type/:id", UtilisateurController.updateUser);
 
 /*************************Evenement Routes ******************/
 router.use(auth);
+router.get(
+  "/evenements/:pageNumber/:search/:filter",
+  EvenementController.getAllEvenement
+);
 router.post("/evenement", EvenementController.createEvenement);
 router.get("/evenement/:id", EvenementController.getOneEvenement);
-router.get("/evenement/", EvenementController.getAllEvenement);
 router.put("/evenement/:id", EvenementController.updateEvenement);
 router.delete("/evenement/:id", EvenementController.deleteEvenement);
 router.put("/demande/opened/:id", EvenementController.changeDemandeIsOpened);

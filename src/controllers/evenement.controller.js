@@ -14,7 +14,7 @@ const { validateId, generateSearchQuery } = require("./controllers.util");
 const EvenementController = {};
 
 var schema = {};
-var limit = 10;
+var limit = 3;
 var generalSchema = {
   intitulé: joi.string().required(),
   debut: joi.date().required(),
@@ -98,21 +98,40 @@ EvenementController.getOneEvenement = async (req, res) => {
 };
 
 EvenementController.getAllEvenement = async (req, res) => {
+  // calculate the request page number offset
+  var { pageNumber } = req.params;
+  var offset = (pageNumber - 1) * limit;
   var evenements = null;
 
   if (req.user.type === "initiateur") {
     evenements = await db.evenement.findAll({
-      limit: 3,
-      offset: 3,
+      limit: limit,
+      offset: offset,
       where: {
         initiateur_id: req.user.id,
+        is_happened: true,
+      },
+      include: {
+        model: db.bilan,
+        include: db.bilan_photo,
       },
     });
   } else {
-    evenements = await db.evenement.findAll({ include: db.type_evenement });
+    evenements = await db.evenement.findAll({
+      limit: limit,
+      offset: offset,
+      where: {
+        is_happened: true,
+      },
+      include: {
+        model: db.bilan,
+        include: db.bilan_photo,
+      },
+    });
   }
   res.status(200).send(evenements);
 };
+
 EvenementController.getAllNotHappenedEventYet = async (req, res) => {
   var evenements = await db.evenement.findAll({
     where: {
