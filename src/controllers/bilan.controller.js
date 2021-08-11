@@ -26,6 +26,14 @@ var limit = 10;
 const createBilanNotification = async (req, type_utilisateur, bilan) => {
   var room = null;
   var notification = null;
+
+  var evenement = await db.evenement.findOne({
+    include: db.initiateur,
+    where: {
+      id: bilan.evenement_id,
+    },
+  });
+
   if (type_utilisateur === typeUtilisateur.ADMINISTRATEUR) {
     // get  Adminstrateur admin id
     const administrateur = await db.administrateur.findOne({
@@ -38,24 +46,29 @@ const createBilanNotification = async (req, type_utilisateur, bilan) => {
         details: ` a ajouté un bilan  `,
         lien: `/bilans/${bilan.id}`,
         administrateur_id: administrateur.id,
-        nom: req.user.nom,
+        creator_id: evenement.initiateur_id,
       });
     }
     // Adminstrateur  room
     room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
+    notification.dataValues.initiateur = {
+      photo: evenement.initiateur.photo,
+      nom: evenement.initiateur.nom,
+    };
   } else {
-    //get initiateur id
-    const evenement = await db.evenement.findByPk(bilan.evenement_id);
-
     // create initiateur notification
     notification = await db.notification_initiateur.create({
       details: ` a  ${req.body.etat} votre bilan `,
       lien: `/bilans/${bilan.id}`,
       initiateur_id: evenement.initiateur_id,
-      nom: req.user.nom,
+      creator_id: req.user.id,
     });
     // initiateur room
     room = `${typeUtilisateur.INITIATEUR}-${evenement.initiateur_id}`;
+    notification.dataValues.administrateur = {
+      photo: req.user.photo,
+      nom: req.user.nom,
+    };
   }
 
   // check if the room empty

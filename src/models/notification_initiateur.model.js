@@ -32,13 +32,6 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
-      nom: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
     },
     {
       freezeTableName: true,

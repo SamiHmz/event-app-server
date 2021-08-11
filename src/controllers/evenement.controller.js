@@ -57,7 +57,7 @@ EvenementController.createEvenement = async (req, res) => {
       details: ` a ajouté une nouvelle demande évènement ${evenement.intitulé} `,
       lien: `/demandes/${evenement.id}`,
       administrateur_id: administrateur.id,
-      nom: req.user.nom,
+      creator_id: req.user.id,
     });
     // Adminstrateur simple room
     const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
@@ -67,6 +67,10 @@ EvenementController.createEvenement = async (req, res) => {
       var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
     }
     if (!isRoomEmpty) {
+      notification.dataValues.initiateur = {
+        photo: req.user.photo,
+        nom: req.user.nom,
+      };
       req.io.to(room).emit("notifications", notification);
     }
   }

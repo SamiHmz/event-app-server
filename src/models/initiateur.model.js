@@ -62,6 +62,9 @@ module.exports = (sequelize, DataTypes) => {
     Initiateur.hasMany(dbModels.notification_initiateur, {
       foreignKey: "initiateur_id",
     });
+    Initiateur.hasMany(dbModels.notification_administrateur, {
+      foreignKey: "creator_id",
+    });
   };
 
   return Initiateur;

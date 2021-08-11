@@ -56,16 +56,24 @@ IntervenantController.createIntervenant = async (req, res) => {
       details: ` a ajouté un intervenant  ${intervenant.prenom} ${intervenant.nom}  `,
       lien: `/intervenants/${intervenant.id}`,
       administrateur_id: administrateur.id,
-      nom: req.user.nom,
+      creator_id: req.user.id,
     });
     // Adminstrateur simple room
     const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
+    notification.dataValues.initiateur = {
+      photo: evenement.initiateur.photo,
+      nom: evenement.initiateur.nom,
+    };
 
     // check if the room emty
     if (req.io.sockets.adapter.rooms.get(room)) {
       var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
     }
     if (!isRoomEmpty) {
+      notification.dataValues.initiateur = {
+        photo: req.user.photo,
+        nom: req.user.nom,
+      };
       req.io.to(room).emit("notifications", notification);
     }
   }

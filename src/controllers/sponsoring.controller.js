@@ -43,9 +43,9 @@ SponsoringController.createSponsoring = async (req, res) => {
   if (administrateur) {
     const notification = await db.notification_administrateur.create({
       details: ` a ajouté un demande sponsoring  `,
-      lien: `/sponsorings/${sponsoring.id}`,
+      lien: `/sponsorings`,
       administrateur_id: administrateur.id,
-      nom: req.user.nom,
+      creator_id: req.user.id,
     });
     // Adminstrateur simple room
     const room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
@@ -55,10 +55,20 @@ SponsoringController.createSponsoring = async (req, res) => {
       var isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
     }
     if (!isRoomEmpty) {
+      notification.dataValues.initiateur = {
+        photo: req.user.photo,
+        nom: req.user.nom,
+      };
       req.io.to(room).emit("notifications", notification);
     }
   }
-
+  var evenement = await db.evenement.findOne({
+    where: {
+      id: sponsoring.evenement_id,
+    },
+    attributes: ["intitulé"],
+  });
+  sponsoring.dataValues.evenement = evenement.dataValues;
   res.status(200).send(sponsoring);
 };
 

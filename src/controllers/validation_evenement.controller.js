@@ -38,7 +38,7 @@ ValidationEvenementController.createValidation = async (req, res) => {
     details: ` a ${validation.etat} votre demande évènement ${evenement.intitulé} `,
     lien: `/demandes/${evenement.id}`,
     initiateur_id: evenement.initiateur_id,
-    nom: req.user.nom,
+    creator_id: req.user.id,
   });
 
   // initiateur room
@@ -48,6 +48,10 @@ ValidationEvenementController.createValidation = async (req, res) => {
   const isRoomEmpty = req.io.sockets.adapter.rooms.get(room).size == 0;
 
   if (!isRoomEmpty) {
+    notification.dataValues.administrateur = {
+      photo: req.user.photo,
+      nom: req.user.nom,
+    };
     req.io.to(room).emit("notifications", notification);
   }
   res.status(201).send(validation);

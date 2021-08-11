@@ -26,6 +26,10 @@ NotificationController.getAllNotifications = async (req, res) => {
       where: {
         initiateur_id: req.user.id,
       },
+      include: {
+        model: db.administrateur,
+        attributes: ["photo", "nom"],
+      },
       order: [["createdAt", "DESC"]],
     });
   } else {
@@ -34,6 +38,10 @@ NotificationController.getAllNotifications = async (req, res) => {
       offset: offset,
       where: {
         administrateur_id: req.user.id,
+      },
+      include: {
+        model: db.initiateur,
+        attributes: ["photo", "nom"],
       },
       order: [["createdAt", "DESC"]],
     });

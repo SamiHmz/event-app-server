@@ -25,6 +25,13 @@ const createIntervenantNotification = async (
 ) => {
   var room = null;
   var notification = null;
+  var evenement = await db.evenement.findOne({
+    include: db.initiateur,
+    where: {
+      id: intervenant.evenement_id,
+    },
+  });
+
   if (type_utilisateur === typeUtilisateur.ADMINISTRATEUR) {
     // get  Adminstrateur admin id
     const administrateur = await db.administrateur.findOne({
@@ -32,29 +39,35 @@ const createIntervenantNotification = async (
         role: role_admin,
       },
     });
+
     if (administrateur) {
       notification = await db.notification_administrateur.create({
-        details: ` a ${req.body.etat} un intervenant  ${intervenant.prenom} ${intervenant.nom}  `,
+        details: ` a ajouté un intervenant ${intervenant.prenom} ${intervenant.nom}  `,
         lien: `/intervenants/${intervenant.id}`,
         administrateur_id: administrateur.id,
-        nom: req.user.nom,
+        creator_id: evenement.initiateur_id,
       });
     }
+    notification.dataValues.initiateur = {
+      photo: evenement.initiateur.photo,
+      nom: evenement.initiateur.nom,
+    };
     // Adminstrateur  room
     room = `${typeUtilisateur.ADMINISTRATEUR}-${administrateur.id}`;
   } else {
-    //get initiateur id
-    const evenement = await db.evenement.findByPk(intervenant.evenement_id);
-
     // create initiateur notification
     notification = await db.notification_initiateur.create({
       details: ` a  ${req.body.etat} votre intervenant ${intervenant.prenom} ${intervenant.nom} `,
       lien: `/intervenants/${intervenant.id}`,
       initiateur_id: evenement.initiateur_id,
-      nom: req.user.nom,
+      creator_id: req.user.id,
     });
     // initiateur room
     room = `${typeUtilisateur.INITIATEUR}-${evenement.initiateur_id}`;
+    notification.dataValues.administrateur = {
+      photo: req.user.photo,
+      nom: req.user.nom,
+    };
   }
 
   // check if the room empty

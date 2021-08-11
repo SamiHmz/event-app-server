@@ -32,13 +32,6 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
-      nom: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: true,
-        },
-      },
     },
     {
       freezeTableName: true,
@@ -48,6 +41,9 @@ module.exports = (sequelize, DataTypes) => {
   NotificationAdministrateur.associate = (dbModels) => {
     NotificationAdministrateur.belongsTo(dbModels.administrateur, {
       foreignKey: "administrateur_id",
+    });
+    NotificationAdministrateur.belongsTo(dbModels.initiateur, {
+      foreignKey: "creator_id",
     });
   };
 
