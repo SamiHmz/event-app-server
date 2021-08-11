@@ -124,7 +124,13 @@ UtilisateurController.authenticateUser = async (req, res) => {
     return res.status(400).send("Invalid email or password");
 
   const token = jwt.sign(
-    { id: user.id, role: user.role, nom: user.nom, type: userType },
+    {
+      id: user.id,
+      role: user.role,
+      nom: user.nom,
+      type: userType,
+      photo: user.photo,
+    },
     process.env.jwtKey
   );
 

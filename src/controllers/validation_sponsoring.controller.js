@@ -105,7 +105,7 @@ ValidationSponsoringController.createSponsoringValidation = async (
       sponsoring,
       roles.ADMIN
     );
-  } else if (user.role === roles.SUPER_ADMIN) {
+  } else if (user.role === roles.ADMIN) {
     sponsoring.etat = body.etat;
   }
 

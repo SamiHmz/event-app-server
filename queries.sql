@@ -8,3 +8,43 @@ update evenement set etat = 'approuvé' where id = 7
 
 
 insert into notification_initiateur(id,details,lien,is_viewed,initiateur_id,"createdAt","updatedAt") values(1,'this is your fitst notif','./demande',false,1,'2016-06-23','2016-06-23');
+
+
+/* nb evenement cette anneé */ 
+
+select count(id) from evenement e where e.initiateur_id = user.id  and e.is_happened=true;
+
+/* sponsoring moneny */
+select  sum(montant) from evenement e join sponsoring s 
+on  e.id = s.evenement_id 
+where e.is_happened = true ;
+and s.etat = 'approuvé'; 
+
+
+/* intervenant      */
+SELECT COUNT(i.id) FROM intervenant i JOIN evenement e
+ ON e.id = i.evenement_id
+ WHERE e.initiateur_id = 1 
+ AND e.is_happened = true
+ AND i.etat = 'approuvé' ;
+
+ /* nb interne */
+ SELECT SUM(b.participants_intern) ,SUM(b.participants_extern) FROM  evenement e JOIN bilan b 
+ ON e.id = b.evenement_id 
+ WHERE b.etat = 'approuvé' 
+ AND e.id = 1 ;
+
+ /*    nb demande rejeteé      */
+
+ SELECT COUNT(e.id) FROM evenement e JOIN initiateur i 
+ ON i.id = e.initiateur_id 
+ WHERE i.id = 1
+ AND e.etat = 'rejetè';
+
+/* nb evenement par type */
+
+ SELECT e.type, COUNT(e.id) FROM evenement e JOIN initiateur i 
+ ON i.id = e.initiateur_id 
+ WHERE i.id =  1 
+ AND e.is_happened = true
+ GROUP BY e.type ;

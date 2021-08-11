@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
     NotificationInitiateur.belongsTo(dbModels.initiateur, {
       foreignKey: "initiateur_id",
     });
+    NotificationInitiateur.belongsTo(dbModels.administrateur, {
+      foreignKey: "creator_id",
+    });
   };
 
   return NotificationInitiateur;

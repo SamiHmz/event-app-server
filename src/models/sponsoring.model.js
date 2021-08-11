@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       montant: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
           isNumeric: true,

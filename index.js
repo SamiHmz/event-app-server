@@ -44,6 +44,10 @@ io.on("connection", (socket) => {
   socket.on("join", (room) => {
     socket.join(room);
   });
+
+  socket.on("disconnect", function () {
+    console.log("a user disonnected", socket.id);
+  });
 });
 
 // place this middleware before any other route definitions

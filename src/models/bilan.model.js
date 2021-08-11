@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       participants_intern: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
           isNumeric: true,
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       participants_extern: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
       },
       etat: {
         type: DataTypes.STRING,

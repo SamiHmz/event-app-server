@@ -11,6 +11,7 @@ const IntervenantController = require("../controllers/intervenant.controller");
 const ValidationIntervenantController = require("../controllers/validation_intervenant.controller");
 const SponsoringController = require("../controllers/sponsoring.controller");
 const ValidationSponsoringController = require("../controllers/validation_sponsoring.controller");
+const DashboardController = require("../controllers/dashboard.controller");
 require("express-async-errors");
 
 /************************ Users Routes **************/
@@ -166,5 +167,8 @@ router.delete(
   "/sponsorings/validation/:id",
   ValidationSponsoringController.deleteValidationSponsoring
 );
+router.get("/dashboard", DashboardController.getDashboadData);
+
+/******************** Dashboard *********************/
 
 module.exports = router;
