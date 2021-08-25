@@ -58,6 +58,12 @@ app.use(function (req, res, next) {
 });
 
 // multer
+var dir = "./uploads";
+
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "/uploads/"));
