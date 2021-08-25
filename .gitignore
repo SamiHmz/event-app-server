@@ -1,6 +1,8 @@
 #img and pdf
 uploads
-# dependencies
+# # dependencies
 node_modules
 #logs
-log
+# log
+queries.sql
+tests

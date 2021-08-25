@@ -49,6 +49,12 @@ IntervenantController.createIntervenant = async (req, res) => {
       role: roles.SIMPLE,
     },
   });
+  var evenement = await db.evenement.findOne({
+    include: db.initiateur,
+    where: {
+      id: intervenant.evenement_id,
+    },
+  });
 
   // create the notification
   if (administrateur) {

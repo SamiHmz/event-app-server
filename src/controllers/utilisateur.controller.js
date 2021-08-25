@@ -14,7 +14,6 @@ require("dotenv").config();
 const db = require("../models").dbModels;
 var limit = 10;
 
-const schema = {};
 const UtilisateurController = {};
 
 /*****************************Users Util Functions ****************************************/
@@ -153,9 +152,12 @@ UtilisateurController.getOneUser = async (req, res) => {
 UtilisateurController.getAllUsers = async (req, res) => {
   var offset = (req.params.pageNumber - 1) * limit;
   const search = JSON.parse(req.params.search);
-  const filter = JSON.parse(req.params.filter);
+  var filter = JSON.parse(req.params.filter);
   var searchQuery = generateSearchQuery(search);
 
+  if (filter.etat) {
+    filter = {};
+  }
   var users = await db.initiateur.findAll({
     limit: limit,
     offset: offset,
