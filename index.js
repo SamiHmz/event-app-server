@@ -11,6 +11,7 @@ const path = require("path");
 const fs = require("fs");
 const { Server } = require("socket.io");
 const multer = require("multer");
+const enforce = require("express-sslify");
 
 const app = Express();
 const server = http.createServer(app);
@@ -31,6 +32,7 @@ const PORT = process.env.PORT || 1998;
 
 // midlleware
 app.use(cors());
+app.use(enforce.HTTPS({ trustProtoHeader: true }));
 app.use(Express.json());
 app.use(logger("dev"));
 
