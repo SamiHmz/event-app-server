@@ -27,7 +27,7 @@ require("dotenv").config();
 logging();
 
 // variable
-const PORT = process.env.SERVER_PORT || "1998";
+const PORT = process.env.PORT || 1998;
 
 // midlleware
 app.use(cors());
