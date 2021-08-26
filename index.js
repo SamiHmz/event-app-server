@@ -58,10 +58,10 @@ app.use(function (req, res, next) {
 });
 
 // multer
-var dir = "./uploads";
 
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir);
+// create uploads folder if not exists
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
 }
 
 var storage = multer.diskStorage({
