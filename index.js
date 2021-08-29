@@ -108,7 +108,7 @@ app.delete("/remove", async (req, res) => {
 app.use("/api/v1/", router);
 
 // Server and Db
-sequelize.sync({ force: true }).then(
+sequelize.sync().then(
   server.listen(PORT, () => {
     console.log(`app listening at port ${PORT}...`);
   })
