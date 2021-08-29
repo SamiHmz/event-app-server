@@ -14,7 +14,7 @@ const { validateId, generateSearchQuery } = require("./controllers.util");
 const EvenementController = {};
 
 var schema = {};
-var limit = 3;
+var limit = 10;
 var generalSchema = {
   intitulé: joi.string().required(),
   debut: joi.date().required(),

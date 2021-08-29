@@ -17,14 +17,21 @@ const typeEvenement = [
   "Workshop",
   "Formation",
   "Visit",
-  "Compètision",
+  "Compétision",
 ];
 
 const typeUtilisateur = {
   ADMINISTRATEUR: "administrateur",
   INITIATEUR: "initiateur",
 };
-const typeInitiateur = ["club", "association"];
+const typeInitiateur = [
+  "club",
+  "association",
+  "laboratoire",
+  "administration",
+  "enseignant",
+  "alumni",
+];
 const modeEvenement = ["Prèsentiel", "En Ligne"];
 const typeIntervenant = ["interne", "externe", "journalist"];
 

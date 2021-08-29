@@ -71,3 +71,13 @@ SELECT i.type,i.etat,COUNT(i.id) FROM intervenant i JOIN evenement e
     GROUP BY i.nom;
 
 
+delete from bilan; 
+delete from bilan_photo; 
+delete from evenement; 
+delete from evenement_journaliste; 
+delete from initiateur; 
+delete from intervenant; 
+delete from media; 
+delete from bilan; 
+delete from bilan; 
+delete from bilan; 

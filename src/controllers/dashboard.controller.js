@@ -95,56 +95,59 @@ const dashboardInitiateur = async (user) => {
   };
 };
 
+const dashboardAdministrateur = async () => {
+  // demandes par etat
+  var [demandes] = await queryByEtat("evenement");
+
+  // intervenant par etat
+  var [intervenats] = await queryByEtat("intervenant");
+
+  // sponsoring par etat
+  var [sponsorings] = await queryByEtat("sponsoring");
+  //bilans par etat
+  var [bilans] = await queryByEtat("bilan");
+  // nb evenement par initateur
+
+  var [nb_evenement] = await sequelize.query(`
+  SELECT i.nom,count(e.is_happened) FROM evenement e RIGHT JOIN initiateur i 
+  ON e.initiateur_id = i.id 
+  WHERE e.is_happened = true or is_happened IS NULL
+  GROUP BY i.nom ;
+
+ `);
+
+  var [budget] = await sequelize.query(`
+ SELECT i.nom ,SUM(s.montant) as count FROM evenement e RIGHT JOIN initiateur i 
+ ON e.initiateur_id = i.id 
+ LEFT JOIN sponsoring s 
+ ON s.evenement_id = e.id 
+WHERE e.is_happened = true or is_happened IS NULL
+ GROUP BY i.nom;
+`);
+  var total_sponsoring = budget.reduce((acumulator, item) => {
+    if (item.count) return acumulator + parseInt(item.count);
+    else return acumulator;
+  }, 0);
+
+  return {
+    demandes: generateEtatWithData(demandes),
+    intervenants: generateEtatWithData(intervenats),
+    sponsorings: generateEtatWithData(sponsorings),
+    bilans: generateEtatWithData(bilans),
+    nb_evenement,
+    budget,
+    total_sponsoring,
+  };
+};
 DashboardController.getDashboadData = async (req, res) => {
   const { user } = req;
   var data = {};
   if (user.type === typeUtilisateur.INITIATEUR) {
     data = await dashboardInitiateur(user);
-    res.status(200).send(data);
-  } else if (user.role === roles.SIMPLE) {
-    // demandes par etat
-    var [demandes] = await queryByEtat("evenement");
-
-    // intervenant par etat
-    var [intervenats] = await queryByEtat("intervenant");
-
-    // sponsoring par etat
-    var [sponsorings] = await queryByEtat("sponsoring");
-    //bilans par etat
-    var [bilans] = await queryByEtat("bilan");
-    // nb evenement par initateur
-
-    var [nb_evenement] = await sequelize.query(`
-    SELECT i.nom,count(e.is_happened) FROM evenement e RIGHT JOIN initiateur i 
-    ON e.initiateur_id = i.id 
-    WHERE e.is_happened = true or is_happened IS NULL
-    GROUP BY i.nom ;
-
-   `);
-
-    var [budget] = await sequelize.query(`
-   SELECT i.nom ,SUM(s.montant) as count FROM evenement e RIGHT JOIN initiateur i 
-   ON e.initiateur_id = i.id 
-   LEFT JOIN sponsoring s 
-   ON s.evenement_id = e.id 
-WHERE e.is_happened = true or is_happened IS NULL
-   GROUP BY i.nom;
-`);
-    var total_sponsoring = budget.reduce((acumulator, item) => {
-      if (item.count) return acumulator + parseInt(item.count);
-      else return acumulator;
-    }, 0);
-
-    res.status(200).send({
-      demandes: generateEtatWithData(demandes),
-      intervenants: generateEtatWithData(intervenats),
-      sponsorings: generateEtatWithData(sponsorings),
-      bilans: generateEtatWithData(bilans),
-      nb_evenement,
-      budget,
-      total_sponsoring,
-    });
+  } else {
+    data = await dashboardAdministrateur();
   }
+  res.status(200).send(data);
 };
 
 module.exports = DashboardController;

@@ -32,10 +32,12 @@ const PORT = process.env.PORT || 1998;
 
 // midlleware
 app.use(cors());
-app.use(enforce.HTTPS({ trustProtoHeader: true }));
 app.use(Express.json());
 app.use(logger("dev"));
 
+if (process.env.NODE_ENV === "production") {
+  app.use(enforce.HTTPS({ trustProtoHeader: true }));
+}
 // error handler
 app.use(error);
 
@@ -106,7 +108,7 @@ app.delete("/remove", async (req, res) => {
 app.use("/api/v1/", router);
 
 // Server and Db
-sequelize.sync().then(
+sequelize.sync({ force: true }).then(
   server.listen(PORT, () => {
     console.log(`app listening at port ${PORT}...`);
   })
