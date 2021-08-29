@@ -102,10 +102,6 @@ module.exports = (sequelize, DataTypes) => {
     });
     Evenement.hasMany(dbModels.sponsoring, { foreignKey: "evenement_id" });
     Evenement.hasMany(dbModels.intervenant, { foreignKey: "evenement_id" });
-    Evenement.belongsToMany(dbModels.journaliste, {
-      through: dbModels.evenement_journaliste,
-      foreignKey: "evenement_id",
-    });
   };
 
   return Evenement;
