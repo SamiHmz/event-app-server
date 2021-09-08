@@ -81,3 +81,8 @@ delete from media;
 delete from bilan; 
 delete from bilan; 
 delete from bilan; 
+
+
+ALTER TABLE evenement
+ALTER COLUMN programe TYPE text,
+ALTER COLUMN objectifs TYPE text;
